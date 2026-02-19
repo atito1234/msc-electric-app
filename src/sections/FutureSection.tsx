@@ -90,6 +90,7 @@ export function FutureSection() {
 
   return (
     <section
+      id="future"
       ref={sectionRef}
       className="section-pinned z-[80]"
     >

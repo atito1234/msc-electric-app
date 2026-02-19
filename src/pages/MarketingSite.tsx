@@ -16,6 +16,8 @@ import { ProjectsSection } from '@/sections/ProjectsSection';
 import { TestimonialsSection } from '@/sections/TestimonialsSection';
 import { ContactSection } from '@/sections/ContactSection';
 import { Footer } from '@/sections/Footer';
+import { TrackRecordSection } from '@/sections/TrackRecordSection';
+import { ServiceSideNav } from '@/sections/ServiceSideNav';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -73,9 +75,13 @@ export function MarketingSite() {
 
       {/* Navigation */}
       <FloatingNav />
+      <ServiceSideNav />
 
       {/* Pinned Sections */}
       <SplitHero />
+      <div id="track-record">
+        <TrackRecordSection />
+      </div>
 
       <PanelSection />
       <AlwaysOnSection />

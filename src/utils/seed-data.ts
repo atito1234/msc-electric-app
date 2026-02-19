@@ -30,7 +30,7 @@ export const seedSupabase = async () => {
             if (error) {
                 console.warn(`Error signing up ${user.role}:`, error.message);
                 // Try signing in if sign up failed (e.g. already exists)
-                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                const { data: signInData } = await supabase.auth.signInWithPassword({
                     email: user.email,
                     password: user.password
                 });

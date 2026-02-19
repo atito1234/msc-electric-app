@@ -47,14 +47,14 @@ export function FloatingNav() {
         if (!isScrolled) {
             // If at top (Arrow state), scroll down to first section
             if (isHome) {
-                // Scroll to the first pinned section (SplitHero is top, Panel is next)
                 window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
             } else {
                 navigate('/');
             }
         } else {
-            // If scrolled (Menu state), toggle menu
-            setIsOpen(!isOpen);
+            // If scrolled, clicking the main button takes you back to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setIsOpen(false);
         }
     };
 
@@ -99,13 +99,14 @@ export function FloatingNav() {
         <div
             ref={containerRef}
             className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center"
+            onMouseEnter={() => isScrolled && setIsOpen(true)}
+            onMouseLeave={() => isScrolled && setIsOpen(false)}
         >
-
-            {/* Expanded Dock (Apple-style) */}
+            {/* Expanded Dock (Apple-style but prominent) */}
             <div
                 className={`
-                    absolute bottom-full mb-4 flex items-center gap-2 p-2
-                    bg-[#111318]/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl
+                    absolute bottom-full mb-4 flex items-center gap-2 p-3
+                    bg-[#111318]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)]
                     transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
                     ${isOpen
                         ? 'opacity-100 scale-100 translate-y-0 visible'
@@ -117,13 +118,15 @@ export function FloatingNav() {
                     <button
                         key={item.label}
                         onClick={item.action}
-                        className="group flex flex-col items-center justify-center w-14 h-14 rounded-xl hover:bg-white/10 transition-all custom-tooltip-container"
+                        className="group relative flex flex-col items-center justify-center w-16 h-16 rounded-xl hover:bg-white/10 transition-all duration-300"
                         aria-label={item.label}
                     >
-                        <item.icon className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-                        <span className="text-[10px] text-gray-500 font-medium mt-1 group-hover:text-[#F2C94C] transition-colors">
+                        <item.icon className="w-6 h-6 text-gray-400 group-hover:text-[#F2C94C] transition-colors mb-1" />
+                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-white uppercase tracking-wider transition-colors">
                             {item.label}
                         </span>
+                        {/* Interactive hover dot */}
+                        <div className="absolute bottom-1 w-1 h-1 rounded-full bg-[#F2C94C] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300" />
                     </button>
                 ))}
             </div>
@@ -134,24 +137,20 @@ export function FloatingNav() {
                 onClick={handleMainClick}
                 className={`
                     group flex items-center justify-center w-14 h-14 rounded-full 
-                    backdrop-blur-md border border-white/10 shadow-lg
-                    transition-all duration-500 ease-out
-                    ${isScrolled
-                        ? 'bg-[#111318]/80 hover:bg-[#111318]'
-                        : 'bg-[#F2C94C] border-[#F2C94C] hover:scale-110'
-                    }
-                    ${isOpen ? 'rotate-180 bg-white/10' : ''}
+                    backdrop-blur-md shadow-[0_0_20px_rgba(242,201,76,0.3)]
+                    bg-[#F2C94C] border border-[#F2C94C] text-black
+                    transition-all duration-500 ease-out hover:scale-110 hover:shadow-[0_0_30px_rgba(242,201,76,0.6)]
                 `}
             >
                 {isOpen ? (
-                    <X className="w-6 h-6 text-white" />
+                    <X className="w-6 h-6 text-black" />
                 ) : (
                     isScrolled ? (
-                        // Menu Icon using simple dots or lines for minimalism
+                        // Menu Icon
                         <div className="flex flex-col gap-1 items-center">
-                            <span className="w-6 h-0.5 bg-white rounded-full group-hover:w-4 transition-all" />
-                            <span className="w-6 h-0.5 bg-white rounded-full" />
-                            <span className="w-6 h-0.5 bg-white rounded-full group-hover:w-4 transition-all" />
+                            <span className="w-6 h-0.5 bg-black rounded-full" />
+                            <span className="w-6 h-0.5 bg-black rounded-full" />
+                            <span className="w-6 h-0.5 bg-black rounded-full" />
                         </div>
                     ) : (
                         <ArrowDown className="w-6 h-6 text-black animate-bounce" />

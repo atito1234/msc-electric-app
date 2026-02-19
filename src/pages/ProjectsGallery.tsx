@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { FloatingNav } from '@/components/ui/FloatingNav';
+import { TrackRecordSection } from '@/sections/TrackRecordSection';
 
 
 const PROJECTS = [
@@ -47,6 +48,8 @@ export function ProjectsGallery() {
                         Explore our extensive gallery of electrical craftsmanship. From high-end residential upgrades to complex commercial infrastructure.
                     </p>
                 </div>
+
+                <TrackRecordSection />
 
                 {/* Filters */}
                 <div className="flex flex-wrap gap-2 mb-12">

@@ -6,9 +6,9 @@ export function SplitHero() {
     const navigate = useNavigate();
     const [hoveredSide, setHoveredSide] = useState<'left' | 'right' | null>(null);
 
-    const handleScrollToTrackRecord = (e: React.MouseEvent) => {
+    const handleScrollToProjects = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const element = document.getElementById('track-record');
+        const element = document.getElementById('projects');
         if (element) {
             element.scrollIntoView({ behavior: 'smooth' });
         }
@@ -65,7 +65,7 @@ export function SplitHero() {
         `}
                 onMouseEnter={() => setHoveredSide('right')}
                 onMouseLeave={() => setHoveredSide(null)}
-                onClick={handleScrollToTrackRecord}
+                onClick={handleScrollToProjects}
             >
                 <div className="absolute inset-0 bg-blue-900/40 group-hover:bg-blue-900/20 transition-all duration-500 z-10" />
                 <div
@@ -84,7 +84,7 @@ export function SplitHero() {
                         Powering 6,000+ units across Texas. The trusted partner for builders.
                     </p>
                     <div className="mt-8 flex items-center gap-2 text-blue-400 text-sm font-semibold uppercase tracking-widest opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
-                        View Track Record <ArrowDown className="w-4 h-4" />
+                        See Our Work <ArrowDown className="w-4 h-4" />
                     </div>
                 </div>
             </div>

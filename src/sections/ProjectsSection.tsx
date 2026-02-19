@@ -123,7 +123,6 @@ export function ProjectsSection() {
   return (
     <section
       ref={sectionRef}
-      id="projects"
       className="relative z-[90] bg-[#F4F6F8] py-24 md:py-32"
     >
       <div className="px-[6vw]">

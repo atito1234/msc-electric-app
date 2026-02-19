@@ -79,8 +79,11 @@ export function MarketingSite() {
 
       {/* Pinned Sections */}
       <SplitHero />
-      <div id="track-record">
+
+      {/* Immediately show past jobs + timeline */}
+      <div id="projects">
         <TrackRecordSection />
+        <ProjectsSection />
       </div>
 
       <PanelSection />
@@ -93,7 +96,6 @@ export function MarketingSite() {
 
       {/* Flowing Sections */}
       <ServicesSection />
-      <ProjectsSection />
       <TestimonialsSection />
       <ContactSection />
       <Footer />

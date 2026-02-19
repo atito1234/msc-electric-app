@@ -1,28 +1,21 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { FloatingNav } from '@/components/ui/FloatingNav';
 import { TrackRecordSection } from '@/sections/TrackRecordSection';
+import { GALLERY_PROJECTS, GALLERY_CATEGORIES, type ProjectCategory } from '@/data/gallery-data';
 
-
-const PROJECTS = [
-    { id: 1, title: 'Modern Ranch Upgrade', category: 'Residential', image: '/hero_home_dusk.jpg', location: 'Austin, TX' },
-    { id: 2, title: 'Downtown Office Complex', category: 'Commercial', image: '/project_commercial.jpg', location: 'Austin, TX' },
-    { id: 3, title: 'EV Charging Station', category: 'Modern', image: '/project_ev.jpg', location: 'Round Rock, TX' },
-    { id: 4, title: 'Smart Home Integration', category: 'Residential', image: '/project_smart.jpg', location: 'West Lake, TX' },
-    { id: 5, title: 'Safety Inspection Retrofit', category: 'Safety', image: '/project_safety.jpg', location: 'Georgetown, TX' },
-    { id: 6, title: 'Custom Landscape Lighting', category: 'Lighting', image: '/project_lighting.jpg', location: 'Austin, TX' },
-    { id: 7, title: 'Main Panel Upgrade', category: 'Technical', image: '/project_panel.jpg', location: 'Pflugerville, TX' },
-    { id: 8, title: 'Kitchen Remodel Wiring', category: 'Residential', image: '/outlets_safety.jpg', location: 'Cedar Park, TX' },
-];
-
-const CATEGORIES = ['All', 'Residential', 'Commercial', 'Technical', 'Lighting', 'Safety'];
 
 export function ProjectsGallery() {
-    const [activeCategory, setActiveCategory] = useState('All');
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [activeCategory, setActiveCategory] = useState<ProjectCategory | 'All'>('All');
+    const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
 
-    const filteredProjects = activeCategory === 'All'
-        ? PROJECTS
-        : PROJECTS.filter(p => p.category === activeCategory || (activeCategory === 'Technical' && p.category === 'Modern'));
+    const filteredProjects = useMemo(() => {
+        if (activeCategory === 'All') return GALLERY_PROJECTS;
+        return GALLERY_PROJECTS.filter(p => p.category === activeCategory);
+    }, [activeCategory]);
+
+    const activeProject = useMemo(() =>
+        GALLERY_PROJECTS.find(p => p.id === selectedImageId),
+        [selectedImageId]);
 
     return (
         <div className="min-h-screen bg-[#0B0C0F] text-white overflow-hidden">
@@ -53,7 +46,14 @@ export function ProjectsGallery() {
 
                 {/* Filters */}
                 <div className="flex flex-wrap gap-2 mb-12">
-                    {CATEGORIES.map(cat => (
+                    <button
+                        onClick={() => setActiveCategory('All')}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === 'All' ? 'bg-[#F2C94C] text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}
+                    >
+                        All Projects
+                    </button>
+
+                    {GALLERY_CATEGORIES.map(cat => (
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
@@ -74,7 +74,7 @@ export function ProjectsGallery() {
                         <div
                             key={project.id}
                             className="group relative aspect-[4/5] bg-gray-900 rounded-xl overflow-hidden cursor-zoom-in border border-white/5 hover:border-[#F2C94C]/50 transition-all duration-500"
-                            onClick={() => setSelectedImage(project.image)}
+                            onClick={() => setSelectedImageId(project.id)}
                         >
                             <div
                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
@@ -98,23 +98,46 @@ export function ProjectsGallery() {
 
             </main>
 
-            {/* Lightbox / Modal */}
-            {selectedImage && (
+            {/* Lightbox / Modal with Story Component */}
+            {activeProject && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4"
-                    onClick={() => setSelectedImage(null)}
+                    className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-xl flex flex-col md:flex-row items-center justify-center p-4 md:p-12 gap-8"
+                    onClick={() => setSelectedImageId(null)}
                 >
                     <button
-                        className="absolute top-6 right-6 text-white/50 hover:text-white"
-                        onClick={() => setSelectedImage(null)}
+                        className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4"
+                        onClick={() => setSelectedImageId(null)}
                     >
-                        Start closing...
+                        <span className="text-xl font-bold uppercase tracking-widest flex items-center gap-2">Close <span className="text-3xl leading-none">&times;</span></span>
                     </button>
-                    <img
-                        src={selectedImage}
-                        alt="Full View"
-                        className="max-h-[90vh] max-w-full rounded-lg shadow-2xl border border-white/10"
-                    />
+
+                    {/* Img Container */}
+                    <div className="relative flex-1 w-full max-h-[60vh] md:max-h-[85vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                        <img
+                            src={activeProject.image}
+                            alt={activeProject.title}
+                            className="max-h-full max-w-full rounded-2xl shadow-2xl border border-white/10 object-contain"
+                        />
+                    </div>
+
+                    {/* Story Container */}
+                    <div className="w-full md:w-[400px] flex-shrink-0 bg-[#111318] p-8 rounded-2xl border border-white/10" onClick={(e) => e.stopPropagation()}>
+                        <span className="inline-block px-3 py-1 bg-[#F2C94C]/10 border border-[#F2C94C]/20 text-[#F2C94C] text-xs uppercase font-bold tracking-wider rounded-full mb-4">
+                            {activeProject.category}
+                        </span>
+                        <h3 className="text-3xl font-display font-bold text-white mb-2">{activeProject.title}</h3>
+                        <p className="text-gray-400 text-sm flex items-center gap-2 mb-6 font-mono">
+                            <span className="w-1.5 h-1.5 bg-[#F2C94C] rounded-full" />
+                            {activeProject.location}
+                        </p>
+
+                        <div className="h-[1px] w-full bg-white/10 mb-6" />
+
+                        <p className="text-gray-300 leading-relaxed text-sm md:text-base">
+                            {activeProject.description}
+                        </p>
+                    </div>
+
                 </div>
             )}
         </div>

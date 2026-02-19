@@ -102,33 +102,36 @@ export function FloatingNav() {
             onMouseEnter={() => isScrolled && setIsOpen(true)}
             onMouseLeave={() => isScrolled && setIsOpen(false)}
         >
-            {/* Expanded Dock (Apple-style but prominent) */}
-            <div
-                className={`
-                    absolute bottom-full mb-4 flex items-center gap-2 p-3
-                    bg-[#111318]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)]
-                    transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
-                    ${isOpen
-                        ? 'opacity-100 scale-100 translate-y-0 visible'
-                        : 'opacity-0 scale-90 translate-y-8 invisible pointer-events-none'
-                    }
-                `}
-            >
-                {menuItems.map((item) => (
-                    <button
-                        key={item.label}
-                        onClick={item.action}
-                        className="group relative flex flex-col items-center justify-center w-16 h-16 rounded-xl hover:bg-white/10 transition-all duration-300"
-                        aria-label={item.label}
-                    >
-                        <item.icon className="w-6 h-6 text-gray-400 group-hover:text-[#F2C94C] transition-colors mb-1" />
-                        <span className="text-[10px] font-bold text-gray-400 group-hover:text-white uppercase tracking-wider transition-colors">
-                            {item.label}
-                        </span>
-                        {/* Interactive hover dot */}
-                        <div className="absolute bottom-1 w-1 h-1 rounded-full bg-[#F2C94C] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300" />
-                    </button>
-                ))}
+            {/* Hover Bridge Wrapper */}
+            <div className={`absolute bottom-full pb-4 ${isOpen ? 'pointer-events-auto' : 'pointer-events-none delay-100'}`}>
+                {/* Expanded Dock (Apple-style but prominent) */}
+                <div
+                    className={`
+                        flex items-center gap-2 p-3
+                        bg-[#111318]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)]
+                        transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
+                        ${isOpen
+                            ? 'opacity-100 scale-100 translate-y-0 visible'
+                            : 'opacity-0 scale-90 translate-y-8 invisible'
+                        }
+                    `}
+                >
+                    {menuItems.map((item) => (
+                        <button
+                            key={item.label}
+                            onClick={item.action}
+                            className="group relative flex flex-col items-center justify-center w-16 h-16 rounded-xl hover:bg-white/10 transition-all duration-300"
+                            aria-label={item.label}
+                        >
+                            <item.icon className="w-6 h-6 text-gray-400 group-hover:text-[#F2C94C] transition-colors mb-1" />
+                            <span className="text-[10px] font-bold text-gray-400 group-hover:text-white uppercase tracking-wider transition-colors">
+                                {item.label}
+                            </span>
+                            {/* Interactive hover dot */}
+                            <div className="absolute bottom-1 w-1 h-1 rounded-full bg-[#F2C94C] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300" />
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Main Button */}

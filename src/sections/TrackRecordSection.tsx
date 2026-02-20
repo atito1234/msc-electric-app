@@ -88,6 +88,21 @@ export function TrackRecordSection({ hidePortfolioCTA = false, showCollages = fa
                 );
             }
 
+            // Fix for client-side routing height calculations
+            let timeoutId = setTimeout(() => {
+                ScrollTrigger.refresh();
+            }, 100);
+
+            // Re-refresh layout fallback for slow images/mobile viewport
+            let fallbackTimeoutId = setTimeout(() => {
+                ScrollTrigger.refresh();
+            }, 600);
+
+            return () => {
+                clearTimeout(timeoutId);
+                clearTimeout(fallbackTimeoutId);
+            };
+
         }, sectionRef);
 
         return () => ctx.revert();

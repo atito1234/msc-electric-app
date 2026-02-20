@@ -8,6 +8,10 @@ import { AIConsultationModal } from '@/components/ui/AIConsultationModal';
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface TrackRecordSectionProps {
+    hidePortfolioCTA?: boolean;
+}
+
 const timelineEvents = [
     { year: '2001', title: 'Foundation', stat: 'Est. 2001', icon: Hammer, desc: 'Where precision began.', images: ['/project_panel.jpg', '/outlets_safety.jpg', '/project_commercial.jpg'] },
     { year: '2012', title: 'Energizing Apts', stat: '4,000+ Units', icon: Zap, desc: 'Massive scale deployment.', images: ['/gallery/IMG_1294.PNG', '/ceiling_fixtures.jpg', '/gallery/IMG_1296.PNG'] },
@@ -17,7 +21,7 @@ const timelineEvents = [
     { year: '2025', title: 'Expansion', stat: '1,080 Units', icon: Trophy, desc: 'Regional dominance.', images: ['/gallery/IMG_1300.PNG', '/project_commercial.jpg', '/gallery/IMG_1294.PNG'] }
 ];
 
-export function TrackRecordSection() {
+export function TrackRecordSection({ hidePortfolioCTA = false }: TrackRecordSectionProps = {}) {
     const sectionRef = useRef<HTMLElement>(null);
     const lineRef = useRef<HTMLDivElement>(null);
     const nodesRef = useRef<HTMLDivElement>(null);
@@ -203,39 +207,41 @@ export function TrackRecordSection() {
                 </div>
 
                 {/* Combined CTAs Grid */}
-                <div className="max-w-6xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className={`mx-auto mt-20 grid grid-cols-1 gap-8 ${hidePortfolioCTA ? 'max-w-3xl' : 'max-w-6xl md:grid-cols-2'}`}>
 
                     {/* View Complete Portfolio */}
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm relative overflow-hidden group flex flex-col items-center justify-between">
-                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
-                        <div>
-                            <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                <ImageIcon className="w-8 h-8 text-blue-400" />
+                    {!hidePortfolioCTA && (
+                        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm relative overflow-hidden group flex flex-col items-center justify-between">
+                            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+                            <div>
+                                <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                    <ImageIcon className="w-8 h-8 text-blue-400" />
+                                </div>
+                                <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-4">
+                                    View Our Complete <span className="text-[#F2C94C]">Portfolio</span>
+                                </h3>
+                                <p className="text-gray-400 text-lg mb-8 max-w-sm mx-auto font-light leading-relaxed flex-grow">
+                                    We've transformed over 6,000 properties across Texas. Explore our extensive gallery.
+                                </p>
                             </div>
-                            <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-4">
-                                View Our Complete <span className="text-[#F2C94C]">Portfolio</span>
-                            </h3>
-                            <p className="text-gray-400 text-lg mb-8 max-w-sm mx-auto font-light leading-relaxed flex-grow">
-                                We've transformed over 6,000 properties across Texas. Explore our extensive gallery.
-                            </p>
+                            <button
+                                onClick={() => {
+                                    if (window.location.pathname === '/projects') {
+                                        const grid = document.getElementById('gallery-grid');
+                                        grid?.scrollIntoView({ behavior: 'smooth' });
+                                    } else {
+                                        window.scrollTo({ top: 0, behavior: 'instant' });
+                                        navigate('/projects');
+                                    }
+                                }}
+                                className="group/btn relative inline-flex items-center justify-center px-8 py-4 bg-transparent border border-white/20 text-white font-bold uppercase tracking-widest rounded-full overflow-hidden transition-all hover:border-white/50 hover:bg-white/5"
+                            >
+                                <span className="relative flex items-center gap-3">
+                                    Explore The Gallery <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform text-[#F2C94C]" />
+                                </span>
+                            </button>
                         </div>
-                        <button
-                            onClick={() => {
-                                if (window.location.pathname === '/projects') {
-                                    const grid = document.getElementById('gallery-grid');
-                                    grid?.scrollIntoView({ behavior: 'smooth' });
-                                } else {
-                                    window.scrollTo({ top: 0, behavior: 'instant' });
-                                    navigate('/projects');
-                                }
-                            }}
-                            className="group/btn relative inline-flex items-center justify-center px-8 py-4 bg-transparent border border-white/20 text-white font-bold uppercase tracking-widest rounded-full overflow-hidden transition-all hover:border-white/50 hover:bg-white/5"
-                        >
-                            <span className="relative flex items-center gap-3">
-                                Explore The Gallery <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform text-[#F2C94C]" />
-                            </span>
-                        </button>
-                    </div>
+                    )}
 
                     {/* Get Excited CTA Box */}
                     <div className="bg-[#111318] border border-[#F2C94C]/20 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm relative overflow-hidden group flex flex-col items-center justify-between shadow-[0_0_40px_rgba(242,201,76,0.05)]">

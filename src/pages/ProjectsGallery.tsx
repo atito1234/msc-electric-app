@@ -88,7 +88,7 @@ export function ProjectsGallery() {
                     </div>
                 </div>
 
-                <TrackRecordSection />
+                <TrackRecordSection hidePortfolioCTA={true} />
 
                 {/* Filters */}
                 <div id="gallery-grid" className="flex flex-wrap gap-2 mb-12 scroll-mt-32">

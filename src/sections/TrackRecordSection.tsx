@@ -11,10 +11,10 @@ gsap.registerPlugin(ScrollTrigger);
 const timelineEvents = [
     { year: '2001', title: 'Foundation', stat: 'Est. 2001', icon: Hammer, desc: 'Where precision began.', images: ['/project_panel.jpg', '/outlets_safety.jpg', '/project_commercial.jpg'] },
     { year: '2012', title: 'Energizing Apts', stat: '4,000+ Units', icon: Zap, desc: 'Massive scale deployment.', images: ['/gallery/IMG_1294.PNG', '/ceiling_fixtures.jpg', '/gallery/IMG_1296.PNG'] },
-    { year: '2016', title: 'Townhome Grids', stat: '480 Homes', icon: Building2, desc: 'High-performance networks.', images: ['/gallery/IMG_3962.PNG', '/gallery/IMG_3963.PNG', '/gallery/IMG_3979.PNG'] },
+    { year: '2016', title: 'Townhome Grids', stat: '480 Homes', icon: Building2, desc: 'High-performance networks.', images: ['/gallery/IMG_1281.PNG', '/gallery/IMG_1286.PNG', '/gallery/IMG_1289.PNG'] },
     { year: '2019', title: 'Scaling Up', stat: '360 Units', icon: TrendingUp, desc: 'Rapid residential growth.', images: ['/hero_home_dusk.jpg', '/project_ev.jpg', '/project_smart.jpg'] },
-    { year: '2023', title: 'Diversified', stat: '541 Units', icon: Users, desc: 'Complex mixed-use infra.', images: ['/gallery/IMG_3959.PNG', '/gallery/IMG_3960.PNG', '/gallery/IMG_3962.PNG'] },
-    { year: '2025', title: 'Expansion', stat: '1,080 Units', icon: Trophy, desc: 'Regional dominance.', images: ['/gallery/IMG_3963.PNG', '/project_commercial.jpg', '/gallery/IMG_1294.PNG'] }
+    { year: '2023', title: 'Diversified', stat: '541 Units', icon: Users, desc: 'Complex mixed-use infra.', images: ['/gallery/IMG_1292.PNG', '/gallery/IMG_1296.PNG', '/gallery/IMG_1297.PNG'] },
+    { year: '2025', title: 'Expansion', stat: '1,080 Units', icon: Trophy, desc: 'Regional dominance.', images: ['/gallery/IMG_1300.PNG', '/project_commercial.jpg', '/gallery/IMG_1294.PNG'] }
 ];
 
 export function TrackRecordSection() {
@@ -221,8 +221,13 @@ export function TrackRecordSection() {
                         </div>
                         <button
                             onClick={() => {
-                                window.scrollTo({ top: 0, behavior: 'instant' });
-                                navigate('/projects');
+                                if (window.location.pathname === '/projects') {
+                                    const grid = document.getElementById('gallery-grid');
+                                    grid?.scrollIntoView({ behavior: 'smooth' });
+                                } else {
+                                    window.scrollTo({ top: 0, behavior: 'instant' });
+                                    navigate('/projects');
+                                }
                             }}
                             className="group/btn relative inline-flex items-center justify-center px-8 py-4 bg-transparent border border-white/20 text-white font-bold uppercase tracking-widest rounded-full overflow-hidden transition-all hover:border-white/50 hover:bg-white/5"
                         >

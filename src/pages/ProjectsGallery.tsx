@@ -91,7 +91,7 @@ export function ProjectsGallery() {
                 <TrackRecordSection />
 
                 {/* Filters */}
-                <div className="flex flex-wrap gap-2 mb-12">
+                <div id="gallery-grid" className="flex flex-wrap gap-2 mb-12 scroll-mt-32">
                     <button
                         onClick={() => setActiveCategory('All')}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === 'All' ? 'bg-[#F2C94C] text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}

@@ -104,8 +104,8 @@ export function AlwaysOnSection() {
           </span>
         </div>
 
-        <div ref={headlineRef} className="mb-4 mt-8 flex flex-col items-center">
-          <h2 className="font-display font-black uppercase leading-[0.85] tracking-tighter text-[clamp(6rem,18vw,16rem)] text-center w-full">
+        <div ref={headlineRef} className="mb-4 mt-8 flex flex-col items-center max-w-full overflow-hidden">
+          <h2 className="font-display font-black uppercase leading-[0.85] tracking-tighter text-[clamp(4.5rem,15vw,16rem)] text-center w-full px-4 break-words">
             <span className="headline-line block electrified pb-2">Always</span>
             <span className="headline-line block electrified">On</span>
           </h2>
@@ -118,38 +118,38 @@ export function AlwaysOnSection() {
         className="absolute inset-0 z-[7] flex flex-col items-center justify-center px-6 md:px-12 max-w-7xl mx-auto pointer-events-none"
       >
         {/* Mission */}
-        <div className="mission-header text-center mb-16 md:mb-20 w-full bg-black/30 backdrop-blur-sm p-8 md:p-12 rounded-3xl border border-white/5 max-w-5xl">
-          <h3 className="font-mono text-[#F2C94C] text-sm md:text-base uppercase tracking-[0.2em] font-bold mb-6">Mission Statement</h3>
-          <p className="font-display text-3xl md:text-5xl text-white leading-tight md:leading-snug">
+        <div className="mission-header text-center mb-8 md:mb-20 w-full min-w-0 bg-black/40 backdrop-blur-sm p-6 sm:p-8 md:p-12 rounded-3xl border border-white/5 max-w-5xl">
+          <h3 className="font-mono text-[#F2C94C] text-xs sm:text-sm md:text-base uppercase tracking-[0.2em] font-bold mb-4 md:mb-6">Mission Statement</h3>
+          <p className="font-display text-2xl sm:text-3xl md:text-5xl text-white leading-tight md:leading-snug break-words">
             To deliver <span className="text-[#F2C94C]">uncompromising electrical infrastructure</span> that empowers progress, safeguards communities, and sets the gold standard for precision.
           </p>
         </div>
 
         {/* Values Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-12 w-full max-h-[50vh] md:max-h-none overflow-y-auto md:overflow-visible pb-4 md:pb-0 scrollbar-hide">
           {/* Value 1 */}
-          <div className="value-card bg-black/40 backdrop-blur-md border border-white/10 p-8 rounded-3xl" style={{ opacity: 0 }}>
-            <div className="text-4xl font-display font-black text-white/10 mb-4 tracking-tighter">01</div>
-            <h4 className="text-xl font-display font-bold text-white mb-3">Relentless Reliability</h4>
-            <p className="text-gray-400 text-sm leading-relaxed">
+          <div className="value-card bg-black/50 backdrop-blur-md border border-white/10 p-5 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl" style={{ opacity: 0 }}>
+            <div className="text-3xl md:text-4xl font-display font-black text-white/10 mb-2 md:mb-4 tracking-tighter">01</div>
+            <h4 className="text-lg md:text-xl font-display font-bold text-white mb-2 md:mb-3">Relentless Reliability</h4>
+            <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
               We treat every wire like a lifeline. When we build it, it stays built. Zero compromise on safety and longevity.
             </p>
           </div>
 
           {/* Value 2 */}
-          <div className="value-card bg-black/40 backdrop-blur-md border border-white/10 p-8 rounded-3xl" style={{ opacity: 0 }}>
-            <div className="text-4xl font-display font-black text-white/10 mb-4 tracking-tighter">02</div>
-            <h4 className="text-xl font-display font-bold text-white mb-3">Precision Execution</h4>
-            <p className="text-gray-400 text-sm leading-relaxed">
+          <div className="value-card bg-black/50 backdrop-blur-md border border-white/10 p-5 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl" style={{ opacity: 0 }}>
+            <div className="text-3xl md:text-4xl font-display font-black text-white/10 mb-2 md:mb-4 tracking-tighter">02</div>
+            <h4 className="text-lg md:text-xl font-display font-bold text-white mb-2 md:mb-3">Precision Execution</h4>
+            <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
               From commercial blueprints to residential panels, we execute with millimeter accuracy. Measure twice, wire once.
             </p>
           </div>
 
           {/* Value 3 */}
-          <div className="value-card bg-black/40 backdrop-blur-md border border-white/10 p-8 rounded-3xl" style={{ opacity: 0 }}>
-            <div className="text-4xl font-display font-black text-white/10 mb-4 tracking-tighter">03</div>
-            <h4 className="text-xl font-display font-bold text-white mb-3">Future-Proof Innovation</h4>
-            <p className="text-gray-400 text-sm leading-relaxed">
+          <div className="value-card bg-black/50 backdrop-blur-md border border-white/10 p-5 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl" style={{ opacity: 0 }}>
+            <div className="text-3xl md:text-4xl font-display font-black text-white/10 mb-2 md:mb-4 tracking-tighter">03</div>
+            <h4 className="text-lg md:text-xl font-display font-bold text-white mb-2 md:mb-3">Future-Proof Innovation</h4>
+            <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
               We don't just solve for today. We anticipate tomorrow's load limits, EV requirements, and smart home revolutions.
             </p>
           </div>

@@ -12,7 +12,6 @@ import { SmartSection } from '@/sections/SmartSection';
 import { LightingSection } from '@/sections/LightingSection';
 import { FutureSection } from '@/sections/FutureSection';
 import { ServicesSection } from '@/sections/ServicesSection';
-import { ProjectsSection } from '@/sections/ProjectsSection';
 import { TestimonialsSection } from '@/sections/TestimonialsSection';
 import { ContactSection } from '@/sections/ContactSection';
 import { Footer } from '@/sections/Footer';
@@ -83,7 +82,6 @@ export function MarketingSite() {
       {/* Immediately show past jobs + timeline */}
       <div id="projects">
         <TrackRecordSection />
-        <ProjectsSection />
       </div>
 
       <PanelSection />

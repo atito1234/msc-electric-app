@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Building2, Zap, Trophy, Users, TrendingUp, Hammer, ArrowRight, MessageSquare, ImageIcon } from 'lucide-react';
@@ -21,6 +22,7 @@ export function TrackRecordSection() {
     const lineRef = useRef<HTMLDivElement>(null);
     const nodesRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
 
     // UI State for triggering modal
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -120,10 +122,10 @@ export function TrackRecordSection() {
 
                 {/* Highly Visible Horizontal Timeline */}
                 <div className="relative py-4 overflow-x-auto hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing w-full">
-                    <div className="min-w-[1200px] px-8 py-40 relative">
+                    <div className="min-w-[1240px] px-8 pt-72 pb-40 relative">
 
                         {/* The Thick Connecting Line */}
-                        <div className="absolute top-1/2 left-0 w-full h-1 -translate-y-1/2 origin-left z-0" ref={lineRef}>
+                        <div className="absolute top-[60%] left-0 w-full h-1 -translate-y-1/2 origin-left z-0" ref={lineRef}>
                             {/* Base line */}
                             <div className="absolute inset-0 bg-white/10 rounded-full" />
                             {/* Glowing line */}
@@ -200,31 +202,60 @@ export function TrackRecordSection() {
                     <span className="text-xs font-mono text-gray-500 tracking-widest uppercase">Swipe to explore</span>
                 </div>
 
-                {/* Get Excited CTA Box */}
-                <div className="max-w-4xl mx-auto mt-20 bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F2C94C] to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+                {/* Combined CTAs Grid */}
+                <div className="max-w-6xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                    <div className="w-16 h-16 bg-[#F2C94C]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <MessageSquare className="w-8 h-8 text-[#F2C94C]" />
+                    {/* View Complete Portfolio */}
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm relative overflow-hidden group flex flex-col items-center justify-between">
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+                        <div>
+                            <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <ImageIcon className="w-8 h-8 text-blue-400" />
+                            </div>
+                            <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-4">
+                                View Our Complete <span className="text-[#F2C94C]">Portfolio</span>
+                            </h3>
+                            <p className="text-gray-400 text-lg mb-8 max-w-sm mx-auto font-light leading-relaxed flex-grow">
+                                We've transformed over 6,000 properties across Texas. Explore our extensive gallery.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                window.scrollTo({ top: 0, behavior: 'instant' });
+                                navigate('/projects');
+                            }}
+                            className="group/btn relative inline-flex items-center justify-center px-8 py-4 bg-transparent border border-white/20 text-white font-bold uppercase tracking-widest rounded-full overflow-hidden transition-all hover:border-white/50 hover:bg-white/5"
+                        >
+                            <span className="relative flex items-center gap-3">
+                                Explore The Gallery <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform text-[#F2C94C]" />
+                            </span>
+                        </button>
                     </div>
 
-                    <h3 className="font-display font-bold text-3xl md:text-5xl text-white mb-4">
-                        Ready for Excellence?
-                    </h3>
-
-                    <p className="text-gray-400 text-lg md:text-xl mb-8 max-w-2xl mx-auto font-light leading-relaxed">
-                        You've seen the track record. Let's make your next project our next success story. Consult with our experts right off the bat and get a custom quote.
-                    </p>
-
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="group/btn relative inline-flex items-center justify-center px-8 py-4 bg-[#F2C94C] text-black font-bold uppercase tracking-widest rounded-full overflow-hidden transition-transform hover:scale-105 shadow-[0_0_30px_rgba(242,201,76,0.3)] hover:shadow-[0_0_50px_rgba(242,201,76,0.5)]"
-                    >
-                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
-                        <span className="relative flex items-center gap-3">
-                            Start Your Project <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                        </span>
-                    </button>
+                    {/* Get Excited CTA Box */}
+                    <div className="bg-[#111318] border border-[#F2C94C]/20 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm relative overflow-hidden group flex flex-col items-center justify-between shadow-[0_0_40px_rgba(242,201,76,0.05)]">
+                        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#F2C94C] to-transparent opacity-70 group-hover:opacity-100 transition-opacity" />
+                        <div>
+                            <div className="w-16 h-16 bg-[#F2C94C]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <MessageSquare className="w-8 h-8 text-[#F2C94C]" />
+                            </div>
+                            <h3 className="font-display font-bold text-3xl md:text-4xl text-white mb-4">
+                                Ready for Excellence?
+                            </h3>
+                            <p className="text-gray-400 text-lg mb-8 max-w-sm mx-auto font-light leading-relaxed">
+                                You've seen the track record. Let's make your next project our next success story.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="group/btn relative w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-[#F2C94C] text-black font-bold uppercase tracking-widest rounded-full overflow-hidden transition-transform hover:scale-105 shadow-[0_0_30px_rgba(242,201,76,0.3)] hover:shadow-[0_0_50px_rgba(242,201,76,0.5)]"
+                        >
+                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
+                            <span className="relative flex items-center gap-3">
+                                Start Your Project <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                            </span>
+                        </button>
+                    </div>
                 </div>
 
             </div>

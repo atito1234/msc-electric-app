@@ -11,7 +11,6 @@ export function AlwaysOnSection() {
   // Phase 1 refs (Always On)
   const headlineRef = useRef<HTMLDivElement>(null);
   const microTopRef = useRef<HTMLDivElement>(null);
-  const bodyRef = useRef<HTMLParagraphElement>(null);
 
   // Phase 2 refs (Values/Mission)
   const valuesContainerRef = useRef<HTMLDivElement>(null);
@@ -42,12 +41,10 @@ export function AlwaysOnSection() {
       }
 
       scrollTl.fromTo(microTopRef.current, { y: '-6vh', opacity: 0 }, { y: 0, opacity: 1, ease: 'none' }, 0.08);
-      scrollTl.fromTo(bodyRef.current, { y: '10vh', opacity: 0 }, { y: 0, opacity: 1, ease: 'none' }, 0.1);
 
       // --- PHASE 1: EXIT (30% - 40%) ---
       scrollTl.to(headlineRef.current, { y: '-20vh', opacity: 0, ease: 'power2.in' }, 0.3);
       scrollTl.to(microTopRef.current, { opacity: 0, ease: 'power2.in' }, 0.3);
-      scrollTl.to(bodyRef.current, { y: '10vh', opacity: 0, ease: 'power2.in' }, 0.3);
 
       // --- PHASE 2: ENTRANCE (40% - 50%) ---
       const valueCards = valuesContainerRef.current?.querySelectorAll('.value-card');
@@ -100,7 +97,7 @@ export function AlwaysOnSection() {
       <div className="absolute inset-0 z-[2] bg-[#0B0C0F]/70 backdrop-blur-[2px]" />
 
       {/* PHASE 1: "Always On" */}
-      <div className="absolute inset-0 z-[6] flex flex-col items-center justify-center text-center px-[6vw] pointer-events-none">
+      <div className="absolute inset-0 z-[10] flex flex-col items-center justify-center text-center px-[6vw] pointer-events-none">
         <div ref={microTopRef} className="absolute top-[16vh] left-1/2 -translate-x-1/2">
           <span className="font-mono text-xs md:text-sm text-[#F2C94C] uppercase tracking-[0.3em] font-bold">
             Our Commitment
@@ -113,10 +110,6 @@ export function AlwaysOnSection() {
             <span className="headline-line block electrified">On</span>
           </h2>
         </div>
-
-        <p ref={bodyRef} className="text-[#A9AFB8] text-lg md:text-2xl max-w-2xl leading-relaxed font-light">
-          Reliability isn't just a promise. It is the very current that powers everything we do.
-        </p>
       </div>
 
       {/* PHASE 2: Mission & Values */}

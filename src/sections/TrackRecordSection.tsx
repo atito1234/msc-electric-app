@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -32,13 +32,13 @@ export function TrackRecordSection({ hidePortfolioCTA = false, showCollages = fa
     // UI State for triggering modal
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         const ctx = gsap.context(() => {
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: sectionRef.current,
-                    start: 'top 75%',
-                    toggleActions: 'play none none reverse'
+                    start: 'top 95%',
+                    toggleActions: 'play none none none'
                 }
             });
 
@@ -87,25 +87,22 @@ export function TrackRecordSection({ hidePortfolioCTA = false, showCollages = fa
                     "-=0.6"
                 );
             }
-
-            // Fix for client-side routing height calculations
-            let timeoutId = setTimeout(() => {
-                ScrollTrigger.refresh();
-            }, 100);
-
-            // Re-refresh layout fallback for slow images/mobile viewport
-            let fallbackTimeoutId = setTimeout(() => {
-                ScrollTrigger.refresh();
-            }, 600);
-
-            return () => {
-                clearTimeout(timeoutId);
-                clearTimeout(fallbackTimeoutId);
-            };
-
         }, sectionRef);
 
-        return () => ctx.revert();
+        // Aggressive layout refresh for mobile routing / image loading shifts
+        const refreshInterval = setInterval(() => {
+            ScrollTrigger.refresh();
+        }, 250);
+
+        const clearId = setTimeout(() => {
+            clearInterval(refreshInterval);
+        }, 3000); // Poll for 3 seconds max
+
+        return () => {
+            ctx.revert();
+            clearInterval(refreshInterval);
+            clearTimeout(clearId);
+        };
     }, []);
 
     return (

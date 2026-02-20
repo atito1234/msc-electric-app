@@ -126,19 +126,19 @@ export function TrackRecordSection({ hidePortfolioCTA = false, showCollages = fa
                 <ClientMarquee />
 
                 {/* Highly Visible Horizontal Timeline */}
-                <div className="relative py-4 overflow-x-auto hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing w-full">
-                    <div className="min-w-[1240px] px-8 pt-72 pb-40 relative">
-
-                        {/* The Thick Connecting Line */}
-                        <div className="absolute top-[60%] left-0 w-full h-1 -translate-y-1/2 origin-left z-0" ref={lineRef}>
-                            {/* Base line */}
-                            <div className="absolute inset-0 bg-white/10 rounded-full" />
-                            {/* Glowing line */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-[#F2C94C] to-[#F2C94C] rounded-full shadow-[0_0_20px_rgba(242,201,76,0.5)]" />
-                        </div>
+                <div className="relative pt-4 overflow-x-auto hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing w-full">
+                    <div className={`min-w-[1240px] px-8 pb-40 relative ${showCollages ? 'pt-[340px]' : 'pt-24'}`}>
 
                         {/* Timeline Nodes */}
                         <div ref={nodesRef} className="flex justify-between items-center relative z-10 w-full">
+                            {/* The Thick Connecting Line */}
+                            <div className="absolute top-1/2 left-0 w-full h-1 -translate-y-1/2 origin-left z-0" ref={lineRef}>
+                                {/* Base line */}
+                                <div className="absolute inset-0 bg-white/10 rounded-full" />
+                                {/* Glowing line */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-[#F2C94C] to-[#F2C94C] rounded-full shadow-[0_0_20px_rgba(242,201,76,0.5)]" />
+                            </div>
+
                             {timelineEvents.map((event, index) => (
                                 <div key={index} className="timeline-card flex flex-col items-center w-56 relative group">
 

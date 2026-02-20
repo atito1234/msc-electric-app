@@ -10,6 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 interface TrackRecordSectionProps {
     hidePortfolioCTA?: boolean;
+    showCollages?: boolean;
 }
 
 const timelineEvents = [
@@ -21,7 +22,7 @@ const timelineEvents = [
     { year: '2025', title: 'Expansion', stat: '1,080 Units', icon: Trophy, desc: 'Regional dominance.', images: ['/gallery/IMG_1300.PNG', '/project_commercial.jpg', '/gallery/IMG_1294.PNG'] }
 ];
 
-export function TrackRecordSection({ hidePortfolioCTA = false }: TrackRecordSectionProps = {}) {
+export function TrackRecordSection({ hidePortfolioCTA = false, showCollages = false }: TrackRecordSectionProps = {}) {
     const sectionRef = useRef<HTMLElement>(null);
     const lineRef = useRef<HTMLDivElement>(null);
     const nodesRef = useRef<HTMLDivElement>(null);
@@ -142,31 +143,33 @@ export function TrackRecordSection({ hidePortfolioCTA = false }: TrackRecordSect
                                 <div key={index} className="timeline-card flex flex-col items-center w-56 relative group">
 
                                     {/* Project Collage (appears on hover) */}
-                                    <div className="absolute bottom-[110%] mb-12 w-64 h-48 opacity-0 scale-95 origin-bottom pointer-events-none group-hover:opacity-100 group-hover:scale-100 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] z-0 flex items-center justify-center">
+                                    {showCollages && (
+                                        <div className="absolute bottom-[110%] mb-12 w-64 h-48 opacity-0 scale-95 origin-bottom pointer-events-none group-hover:opacity-100 group-hover:scale-100 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] z-0 flex items-center justify-center">
 
-                                        {/* Left Image */}
-                                        <div className="absolute w-28 h-36 rounded-xl border border-white/20 bg-[#111318] shadow-2xl overflow-hidden -rotate-[15deg] -translate-x-12 translate-y-6 group-hover:-translate-x-16 group-hover:-rotate-12 transition-all duration-700">
-                                            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors z-10" />
-                                            <img src={event.images[0]} className="w-full h-full object-cover scale-110" alt="collage-1" />
-                                        </div>
+                                            {/* Left Image */}
+                                            <div className="absolute w-28 h-36 rounded-xl border border-white/20 bg-[#111318] shadow-2xl overflow-hidden -rotate-[15deg] -translate-x-12 translate-y-6 group-hover:-translate-x-16 group-hover:-rotate-12 transition-all duration-700">
+                                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors z-10" />
+                                                <img src={event.images[0]} className="w-full h-full object-cover scale-110" alt="collage-1" />
+                                            </div>
 
-                                        {/* Right Image */}
-                                        <div className="absolute w-28 h-36 rounded-xl border border-white/20 bg-[#111318] shadow-2xl overflow-hidden rotate-[15deg] translate-x-12 translate-y-6 group-hover:translate-x-16 group-hover:rotate-12 transition-all duration-700">
-                                            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors z-10" />
-                                            <img src={event.images[2]} className="w-full h-full object-cover scale-110" alt="collage-3" />
-                                        </div>
+                                            {/* Right Image */}
+                                            <div className="absolute w-28 h-36 rounded-xl border border-white/20 bg-[#111318] shadow-2xl overflow-hidden rotate-[15deg] translate-x-12 translate-y-6 group-hover:translate-x-16 group-hover:rotate-12 transition-all duration-700">
+                                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors z-10" />
+                                                <img src={event.images[2]} className="w-full h-full object-cover scale-110" alt="collage-3" />
+                                            </div>
 
-                                        {/* Center Top Image */}
-                                        <div className="absolute w-32 h-44 rounded-xl border border-[#F2C94C]/40 bg-[#111318] shadow-[0_0_40px_rgba(242,201,76,0.2)] overflow-hidden z-10 group-hover:-translate-y-4 transition-all duration-700">
-                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors z-10" />
-                                            <img src={event.images[1]} className="w-full h-full object-cover scale-110" alt="collage-2" />
+                                            {/* Center Top Image */}
+                                            <div className="absolute w-32 h-44 rounded-xl border border-[#F2C94C]/40 bg-[#111318] shadow-[0_0_40px_rgba(242,201,76,0.2)] overflow-hidden z-10 group-hover:-translate-y-4 transition-all duration-700">
+                                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors z-10" />
+                                                <img src={event.images[1]} className="w-full h-full object-cover scale-110" alt="collage-2" />
 
-                                            {/* Top Banner Tag */}
-                                            <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] text-white font-bold flex items-center gap-1 z-20 whitespace-nowrap border border-white/10">
-                                                <ImageIcon className="w-3 h-3 text-[#F2C94C]" /> Preview
+                                                {/* Top Banner Tag */}
+                                                <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] text-white font-bold flex items-center gap-1 z-20 whitespace-nowrap border border-white/10">
+                                                    <ImageIcon className="w-3 h-3 text-[#F2C94C]" /> Preview
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                     {/* Top: Massive Year */}
                                     <div className="absolute bottom-full mb-8 flex flex-col items-center origin-bottom transform transition-transform duration-500 group-hover:-translate-y-4">

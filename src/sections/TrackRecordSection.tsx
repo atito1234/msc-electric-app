@@ -111,8 +111,8 @@ export function TrackRecordSection() {
                 </div>
 
                 {/* Highly Visible Horizontal Timeline */}
-                <div className="relative pt-8 pb-16 overflow-x-auto hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing">
-                    <div className="min-w-[1200px] px-8 py-10 relative">
+                <div className="relative py-4 overflow-x-auto hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing w-full">
+                    <div className="min-w-[1200px] px-8 py-40 relative">
 
                         {/* The Thick Connecting Line */}
                         <div className="absolute top-1/2 left-0 w-full h-1 -translate-y-1/2 origin-left z-0" ref={lineRef}>
@@ -123,9 +123,9 @@ export function TrackRecordSection() {
                         </div>
 
                         {/* Timeline Nodes */}
-                        <div ref={nodesRef} className="flex justify-between items-center relative z-10">
+                        <div ref={nodesRef} className="flex justify-between items-center relative z-10 w-full">
                             {timelineEvents.map((event, index) => (
-                                <div key={index} className="timeline-card flex flex-col items-center w-48 relative group">
+                                <div key={index} className="timeline-card flex flex-col items-center w-56 relative group">
 
                                     {/* Top: Massive Year */}
                                     <div className="absolute bottom-full mb-8 flex flex-col items-center origin-bottom transform transition-transform duration-500 group-hover:-translate-y-4">

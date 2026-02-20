@@ -1,12 +1,26 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { FloatingNav } from '@/components/ui/FloatingNav';
 import { TrackRecordSection } from '@/sections/TrackRecordSection';
 import { GALLERY_PROJECTS, GALLERY_CATEGORIES, type ProjectCategory } from '@/data/gallery-data';
+import { ShieldCheck, Award, Clock, ArrowRight, Zap } from 'lucide-react';
+import { AIConsultationModal } from '@/components/ui/AIConsultationModal';
 
 
 export function ProjectsGallery() {
     const [activeCategory, setActiveCategory] = useState<ProjectCategory | 'All'>('All');
     const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+    const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
+    const [consultationContext, setConsultationContext] = useState<{ type: string, title: string } | null>(null);
+
+    const handleOpenConsultation = (project?: typeof GALLERY_PROJECTS[0]) => {
+        if (project) {
+            setConsultationContext({ type: 'chat', title: `Inquiry: ${project.title}` });
+        } else {
+            setConsultationContext({ type: 'selection', title: 'General Inquiry' });
+        }
+        setIsConsultationModalOpen(true);
+    };
 
     const filteredProjects = useMemo(() => {
         if (activeCategory === 'All') return GALLERY_PROJECTS;
@@ -23,23 +37,55 @@ export function ProjectsGallery() {
 
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-40 bg-[#0B0C0F]/80 backdrop-blur-md border-b border-white/5 py-6 px-6 md:px-12 flex items-center justify-between">
-                <div>
+                <Link to="/" className="hover:opacity-80 transition-opacity">
                     <h1 className="text-2xl font-display font-bold">MSC Electric <span className="text-[#F2C94C] text-sm font-mono ml-2">PORTFOLIO</span></h1>
-                </div>
+                </Link>
             </header>
 
             {/* Main Content */}
             <main className="pt-32 px-6 md:px-12 pb-20">
 
                 {/* Intro */}
-                <div className="max-w-4xl mb-12">
-                    <h2 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight">
+                <div className="max-w-5xl mb-12 relative z-10">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-12 h-12 bg-[#F2C94C] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(242,201,76,0.5)]">
+                            <Zap className="w-6 h-6 text-black fill-current" />
+                        </div>
+                        <h2 className="text-3xl font-display font-bold text-white tracking-tight">MSC Electric</h2>
+                    </div>
+
+                    <h2 className="text-5xl md:text-7xl font-display font-bold mb-6 leading-tight tracking-tight">
                         6,000+ Homes <br />
-                        <span className="text-gray-500">Transformed.</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-gray-700">Transformed.</span>
                     </h2>
-                    <p className="text-gray-400 text-lg max-w-2xl font-light">
+                    <p className="text-gray-400 text-lg md:text-xl max-w-2xl font-light leading-relaxed mb-10">
                         Explore our extensive gallery of electrical craftsmanship. From high-end residential upgrades to complex commercial infrastructure.
                     </p>
+
+                    {/* Trust Builders & CTA */}
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-4">
+                        <button
+                            onClick={() => handleOpenConsultation()}
+                            className="bg-[#F2C94C] text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-yellow-400 transition-all hover:scale-105 shadow-[0_0_30px_rgba(242,201,76,0.3)] flex items-center justify-center min-w-[240px]"
+                        >
+                            Start Your Project
+                        </button>
+
+                        <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm text-gray-300 font-medium">
+                            <div className="flex items-center gap-2">
+                                <ShieldCheck className="w-5 h-5 text-[#F2C94C]" />
+                                Licensed, Bonded & Insured
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Award className="w-5 h-5 text-[#F2C94C]" />
+                                100% Satisfaction Guarantee
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-[#F2C94C]" />
+                                24/7 Priority Support
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <TrackRecordSection />
@@ -133,13 +179,31 @@ export function ProjectsGallery() {
 
                         <div className="h-[1px] w-full bg-white/10 mb-6" />
 
-                        <p className="text-gray-300 leading-relaxed text-sm md:text-base">
+                        <p className="text-gray-300 leading-relaxed text-sm md:text-base mb-8">
                             {activeProject.description}
                         </p>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenConsultation(activeProject);
+                            }}
+                            className="w-full bg-[#1A1D24] border border-[#F2C94C]/30 hover:border-[#F2C94C] text-[#F2C94C] py-4 rounded-xl font-bold uppercase tracking-widest transition-all hover:bg-[#F2C94C]/10 flex justify-center items-center gap-3 group"
+                        >
+                            Request This Service
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
                     </div>
 
                 </div>
             )}
+
+            {/* Global Modals for Gallery Layer */}
+            <AIConsultationModal
+                isOpen={isConsultationModalOpen}
+                onClose={() => setIsConsultationModalOpen(false)}
+                context={consultationContext}
+            />
         </div>
     );
 }

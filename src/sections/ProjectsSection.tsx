@@ -1,120 +1,32 @@
 import { useRef, useLayoutEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ArrowRight, ImageIcon } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const projects = [
-  {
-    image: '/project_panel.jpg',
-    title: 'Modern Panel Upgrade',
-    category: 'Residential',
-  },
-  {
-    image: '/project_ev.jpg',
-    title: 'EV Charger Install',
-    category: 'Future-Ready',
-  },
-  {
-    image: '/project_lighting.jpg',
-    title: 'Recessed Lighting',
-    category: 'Lighting',
-  },
-  {
-    image: '/project_smart.jpg',
-    title: 'Smart Home Switching',
-    category: 'Automation',
-  },
-  {
-    image: '/project_commercial.jpg',
-    title: 'Commercial Fit-Out',
-    category: 'Commercial',
-  },
-  {
-    image: '/project_safety.jpg',
-    title: 'Safety Retrofit',
-    category: 'Protection',
-  },
-];
-
 export function ProjectsSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const headingRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const underlineRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Heading animation
-      gsap.fromTo(headingRef.current,
-        { y: 24, opacity: 0 },
+      gsap.fromTo(contentRef.current,
+        { y: 40, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.8,
+          duration: 1,
           ease: 'power3.out',
           scrollTrigger: {
-            trigger: headingRef.current,
+            trigger: sectionRef.current,
             start: 'top 80%',
             toggleActions: 'play none none reverse',
           }
         }
       );
-
-      // Underline animation
-      gsap.fromTo(underlineRef.current,
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: underlineRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
-          }
-        }
-      );
-
-      // Gallery items animation
-      const items = gridRef.current?.querySelectorAll('.project-item');
-      if (items) {
-        gsap.fromTo(items,
-          { y: 50, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: gridRef.current,
-              start: 'top 75%',
-              toggleActions: 'play none none reverse',
-            }
-          }
-        );
-      }
-
-      // Parallax for images
-      const images = gridRef.current?.querySelectorAll('.project-image');
-      if (images) {
-        images.forEach((img) => {
-          gsap.fromTo(img,
-            { y: -10 },
-            {
-              y: 10,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: img,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: true,
-              }
-            }
-          );
-        });
-      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -123,44 +35,37 @@ export function ProjectsSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative z-[90] bg-[#F4F6F8] py-24 md:py-32"
+      className="relative z-[90] bg-[#0B0C0F] py-24 md:py-32 border-t border-white/5 overflow-hidden"
     >
-      <div className="px-[6vw]">
-        {/* Heading */}
-        <div ref={headingRef} className="mb-12 md:mb-16">
-          <h2 className="font-display font-bold text-4xl md:text-5xl text-[#0B0C0F] mb-4">
-            Projects
-          </h2>
-          <div ref={underlineRef} className="w-24 h-[2px] bg-[#F2C94C] origin-left mb-6" />
-          <p className="text-[#4A4D55] text-lg max-w-xl">
-            Real homes. Real precision. Real results.
-          </p>
-        </div>
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[40vw] md:h-[40vw] bg-[#F2C94C]/5 rounded-full blur-[120px] pointer-events-none" />
 
-        {/* Projects Grid */}
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-          {projects.map((project, index) => (
-            <div
-              key={index}
-              className="project-item group cursor-pointer"
-            >
-              <div className="relative overflow-hidden rounded-xl aspect-[16/10] mb-4">
-                <div
-                  className="project-image absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${project.image})` }}
-                />
-                <div className="absolute inset-0 bg-[#0B0C0F]/20 group-hover:bg-[#0B0C0F]/10 transition-colors duration-300" />
-              </div>
-              <div className="flex items-center justify-between">
-                <h3 className="font-display font-semibold text-lg text-[#0B0C0F] group-hover:text-[#1A1D24] transition-colors">
-                  {project.title}
-                </h3>
-                <span className="font-mono text-xs text-[#6A6D75] bg-[#E8EAEC] px-3 py-1 rounded-full">
-                  {project.category}
-                </span>
-              </div>
-            </div>
-          ))}
+      <div className="container mx-auto px-6 relative z-10">
+        <div
+          ref={contentRef}
+          className="max-w-4xl mx-auto bg-white/5 border border-white/10 rounded-3xl p-8 md:p-16 text-center backdrop-blur-sm"
+        >
+          <div className="w-16 h-16 bg-[#F2C94C]/10 rounded-2xl flex items-center justify-center mx-auto mb-8">
+            <ImageIcon className="w-8 h-8 text-[#F2C94C]" />
+          </div>
+          <h2 className="font-display font-bold text-4xl md:text-5xl text-white mb-6">
+            View Our Complete <span className="text-[#F2C94C]">Portfolio</span>
+          </h2>
+          <p className="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-light leading-relaxed">
+            We've transformed over 6,000 properties across Texas. Explore our extensive gallery showcasing everything from underground commercial infrastructure to luxury residential smart homes.
+          </p>
+          <button
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'instant' });
+              navigate('/projects');
+            }}
+            className="group relative inline-flex items-center justify-center px-8 py-4 bg-[#F2C94C] text-black font-bold uppercase tracking-widest rounded-full overflow-hidden transition-transform hover:scale-105 shadow-[0_0_40px_rgba(242,201,76,0.3)] hover:shadow-[0_0_60px_rgba(242,201,76,0.5)]"
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+            <span className="relative flex items-center gap-3">
+              Explore The Gallery <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </span>
+          </button>
         </div>
       </div>
     </section>

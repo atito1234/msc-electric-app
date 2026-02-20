@@ -107,10 +107,10 @@ export function AlwaysOnSection() {
           </span>
         </div>
 
-        <div ref={headlineRef} className="mb-8 mt-12">
-          <h2 className="font-display font-bold text-[#F6F7F9] uppercase leading-[0.92] tracking-tight text-[clamp(4rem,12vw,10rem)]">
-            <span className="headline-line block drop-shadow-2xl">Always</span>
-            <span className="headline-line block drop-shadow-2xl">On</span>
+        <div ref={headlineRef} className="mb-4 mt-8 flex flex-col items-center">
+          <h2 className="font-display font-black uppercase leading-[0.85] tracking-tighter text-[clamp(6rem,18vw,16rem)] text-center w-full">
+            <span className="headline-line block electrified pb-2">Always</span>
+            <span className="headline-line block electrified">On</span>
           </h2>
         </div>
 
@@ -125,10 +125,10 @@ export function AlwaysOnSection() {
         className="absolute inset-0 z-[7] flex flex-col items-center justify-center px-6 md:px-12 max-w-7xl mx-auto pointer-events-none"
       >
         {/* Mission */}
-        <div className="mission-header text-center mb-16 md:mb-24 w-full">
+        <div className="mission-header text-center mb-16 md:mb-20 w-full bg-black/30 backdrop-blur-sm p-8 md:p-12 rounded-3xl border border-white/5 max-w-5xl">
           <h3 className="font-mono text-[#F2C94C] text-sm md:text-base uppercase tracking-[0.2em] font-bold mb-6">Mission Statement</h3>
-          <p className="font-display text-2xl md:text-4xl text-white leading-tight md:leading-snug max-w-4xl mx-auto">
-            "To deliver <span className="text-[#F2C94C]">uncompromising electrical infrastructure</span> that empowers progress, safeguards communities, and sets the gold standard for precision."
+          <p className="font-display text-3xl md:text-5xl text-white leading-tight md:leading-snug">
+            To deliver <span className="text-[#F2C94C]">uncompromising electrical infrastructure</span> that empowers progress, safeguards communities, and sets the gold standard for precision.
           </p>
         </div>
 

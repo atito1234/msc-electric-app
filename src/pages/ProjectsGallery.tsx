@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FloatingNav } from '@/components/ui/FloatingNav';
 import { TrackRecordSection } from '@/sections/TrackRecordSection';
 import { GALLERY_PROJECTS, GALLERY_CATEGORIES, type ProjectCategory } from '@/data/gallery-data';
@@ -8,7 +8,9 @@ import { AIConsultationModal } from '@/components/ui/AIConsultationModal';
 
 
 export function ProjectsGallery() {
-    const [activeCategory, setActiveCategory] = useState<ProjectCategory | 'All'>('All');
+    const location = useLocation();
+    const defaultCategory = (location.state as { category?: ProjectCategory | 'All' })?.category || 'All';
+    const [activeCategory, setActiveCategory] = useState<ProjectCategory | 'All'>(defaultCategory);
     const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
     const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
     const [consultationContext, setConsultationContext] = useState<{ type: string, title: string } | null>(null);

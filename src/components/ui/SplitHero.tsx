@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowDown, Building2, Home } from 'lucide-react';
+import { ArrowDown, ArrowRight, Building2, Home } from 'lucide-react';
 
 export function SplitHero() {
     const navigate = useNavigate();
@@ -8,18 +8,14 @@ export function SplitHero() {
 
     const handleScrollToProjects = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const element = document.getElementById('projects');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        navigate('/projects', { state: { category: 'Multi-Family & Commercial' } });
     };
 
     const handleScrollToResidential = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const element = document.getElementById('panel');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        navigate('/projects', { state: { category: 'Custom Residential' } });
     };
 
     return (
@@ -52,7 +48,7 @@ export function SplitHero() {
                         Expert upgrades, repairs, and smart home solutions for homeowners.
                     </p>
                     <div className="mt-8 flex items-center gap-2 text-[#F2C94C] text-sm font-semibold uppercase tracking-widest opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
-                        For Homeowners <ArrowDown className="w-4 h-4" />
+                        View Residential Gallery <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                 </div>
             </div>
@@ -84,7 +80,7 @@ export function SplitHero() {
                         Powering 6,000+ units across Texas. The trusted partner for builders.
                     </p>
                     <div className="mt-8 flex items-center gap-2 text-blue-400 text-sm font-semibold uppercase tracking-widest opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
-                        See Our Work <ArrowDown className="w-4 h-4" />
+                        View Commercial Gallery <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                 </div>
             </div>

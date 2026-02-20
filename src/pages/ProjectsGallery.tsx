@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FloatingNav } from '@/components/ui/FloatingNav';
 import { TrackRecordSection } from '@/sections/TrackRecordSection';
 import { GALLERY_PROJECTS, GALLERY_CATEGORIES, type ProjectCategory } from '@/data/gallery-data';
@@ -9,6 +9,7 @@ import { AIConsultationModal } from '@/components/ui/AIConsultationModal';
 
 export function ProjectsGallery() {
     const location = useLocation();
+    const navigate = useNavigate();
     const defaultCategory = (location.state as { category?: ProjectCategory | 'All' })?.category || 'All';
     const [activeCategory, setActiveCategory] = useState<ProjectCategory | 'All'>(defaultCategory);
     const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
@@ -42,6 +43,20 @@ export function ProjectsGallery() {
                 <Link to="/" className="hover:opacity-80 transition-opacity">
                     <h1 className="text-2xl font-display font-bold">MSC Electric <span className="text-[#F2C94C] text-sm font-mono ml-2">PORTFOLIO</span></h1>
                 </Link>
+
+                <button
+                    onClick={() => {
+                        navigate('/');
+                        setTimeout(() => {
+                            const el = document.getElementById('services');
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                    }}
+                    className="hidden md:flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors group"
+                >
+                    <ArrowRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                    Back to Services
+                </button>
             </header>
 
             {/* Main Content */}
@@ -65,13 +80,30 @@ export function ProjectsGallery() {
                     </p>
 
                     {/* Trust Builders & CTA */}
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-4">
-                        <button
-                            onClick={() => handleOpenConsultation()}
-                            className="bg-[#F2C94C] text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-yellow-400 transition-all hover:scale-105 shadow-[0_0_30px_rgba(242,201,76,0.3)] flex items-center justify-center min-w-[240px]"
-                        >
-                            Start Your Project
-                        </button>
+                    <div className="flex flex-col gap-6 mb-4">
+                        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                            <button
+                                onClick={() => handleOpenConsultation()}
+                                className="bg-[#F2C94C] text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-yellow-400 transition-all hover:scale-105 shadow-[0_0_30px_rgba(242,201,76,0.3)] flex items-center justify-center flex-1 sm:flex-none group"
+                            >
+                                Start Your Project
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    navigate('/');
+                                    // Small delay to allow home page to render before scrolling
+                                    setTimeout(() => {
+                                        const el = document.getElementById('services');
+                                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                    }, 100);
+                                }}
+                                className="bg-transparent border border-white/20 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-white/5 hover:border-white/40 transition-all flex items-center justify-center gap-3 flex-1 sm:flex-none group"
+                            >
+                                Explore Services
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#F2C94C]" />
+                            </button>
+                        </div>
 
                         <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm text-gray-300 font-medium">
                             <div className="flex items-center gap-2">

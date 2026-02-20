@@ -1,7 +1,8 @@
 import { useRef, useLayoutEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Building2, Zap, Trophy, Users, TrendingUp, Hammer } from 'lucide-react';
+import { Building2, Zap, Trophy, Users, TrendingUp, Hammer, ArrowRight, MessageSquare } from 'lucide-react';
+import { ClientMarquee } from '@/components/ui/ClientMarquee';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -105,10 +106,13 @@ export function TrackRecordSection() {
                     <h2 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 tracking-tight">
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F2C94C] to-yellow-200">24 Years</span> of Excellence
                     </h2>
-                    <p className="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed mb-6">
                         We don't just wire buildings; we energize communities. A legacy of <span className="text-white font-bold">6,000+ units</span> built on precision and trust.
                     </p>
                 </div>
+
+                {/* Infinite Flowing Client Logos */}
+                <ClientMarquee />
 
                 {/* Highly Visible Horizontal Timeline */}
                 <div className="relative py-4 overflow-x-auto hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing w-full">
@@ -161,8 +165,40 @@ export function TrackRecordSection() {
                 </div>
 
                 {/* Scroll hint for desktop if it overflows slightly */}
-                <div className="text-center mt-8 md:hidden">
+                <div className="text-center mt-8 md:hidden mb-16">
                     <span className="text-xs font-mono text-gray-500 tracking-widest uppercase">Swipe to explore</span>
+                </div>
+
+                {/* Get Excited CTA Box */}
+                <div className="max-w-4xl mx-auto mt-20 bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F2C94C] to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+
+                    <div className="w-16 h-16 bg-[#F2C94C]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <MessageSquare className="w-8 h-8 text-[#F2C94C]" />
+                    </div>
+
+                    <h3 className="font-display font-bold text-3xl md:text-5xl text-white mb-4">
+                        Ready for Excellence?
+                    </h3>
+
+                    <p className="text-gray-400 text-lg md:text-xl mb-8 max-w-2xl mx-auto font-light leading-relaxed">
+                        You've seen the track record. Let's make your next project our next success story. Consult with our experts right off the bat and get a custom quote.
+                    </p>
+
+                    <button
+                        onClick={() => {
+                            const element = document.getElementById('contact');
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }}
+                        className="group/btn relative inline-flex items-center justify-center px-8 py-4 bg-[#F2C94C] text-black font-bold uppercase tracking-widest rounded-full overflow-hidden transition-transform hover:scale-105 shadow-[0_0_30px_rgba(242,201,76,0.3)] hover:shadow-[0_0_50px_rgba(242,201,76,0.5)]"
+                    >
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
+                        <span className="relative flex items-center gap-3">
+                            Start Your Project <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                        </span>
+                    </button>
                 </div>
 
             </div>

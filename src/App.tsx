@@ -7,6 +7,7 @@ import { AdminPortal } from './portals/AdminPortal';
 import { ClientPortal } from './portals/ClientPortal';
 import { EmployeePortal } from './portals/EmployeePortal';
 import { SubcontractorPortal } from './portals/SubcontractorPortal';
+import { GCPortal } from './portals/GCPortal';
 import { Toaster } from '@/components/ui/sonner';
 import { seedDatabase } from './lib/database';
 
@@ -32,6 +33,8 @@ function RoleRedirect() {
       return <Navigate to="/employee" replace />;
     case 'subcontractor':
       return <Navigate to="/subcontractor" replace />;
+    case 'gc':
+      return <Navigate to="/gc" replace />;
     default:
       return <Navigate to="/login" replace />;
   }
@@ -52,6 +55,7 @@ function App() {
           <Route path="/client/*" element={<ClientPortal />} />
           <Route path="/employee/*" element={<EmployeePortal />} />
           <Route path="/subcontractor/*" element={<SubcontractorPortal />} />
+          <Route path="/gc/*" element={<GCPortal />} />
 
           {/* Dashboard redirect based on role */}
           <Route path="/dashboard" element={<RoleRedirect />} />

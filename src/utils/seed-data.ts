@@ -6,7 +6,8 @@ const DEMO_USERS = [
     { role: 'admin', email: 'admin@mscelectric.io', password: 'admin123', name: 'Admin User', hourly_rate: 0 },
     { role: 'client', email: 'johnson.family@email.com', password: 'client123', name: 'Michael Johnson', hourly_rate: 0 },
     { role: 'employee', email: 'carlos.martinez@mscelectric.com', password: 'employee123', name: 'Carlos Martinez', hourly_rate: 85 },
-    { role: 'subcontractor', email: 'juan.rodriguez@jrelectric.com', password: 'sub123', name: 'Juan Rodriguez', hourly_rate: 75 }
+    { role: 'subcontractor', email: 'juan.rodriguez@jrelectric.com', password: 'sub123', name: 'Juan Rodriguez', hourly_rate: 75 },
+    { role: 'gc', email: 'builder@apexconstruction.com', password: 'gc123', name: 'Apex Construction', hourly_rate: 0 }
 ];
 
 export const seedSupabase = async () => {

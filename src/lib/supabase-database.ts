@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Project, Invoice, User, WorkOrder, Contract, DashboardAnalytics } from './database';
+import type { Project, Invoice, User, WorkOrder, Contract, DashboardAnalytics, Lead } from './database';
 
 // Helper to map snake_case DB to camelCase Frontend
 const mapProjectFromDB = (p: any): Project => ({
@@ -322,7 +322,7 @@ export const db = {
     },
 
     // Leads
-    saveLead: async (lead: Lead): Promise<void> => {
+    saveLead: async (lead: Partial<Lead>): Promise<void> => {
         const dbLead = {
             name: lead.name,
             email: lead.email,
@@ -332,26 +332,44 @@ export const db = {
             complexity: lead.complexity,
             description: lead.description,
             preferred_time: lead.preferredTime,
-            status: lead.status
+            status: lead.status || 'new'
         };
         const { error } = await supabase.from('leads').insert(dbLead);
         if (error) throw error;
     },
-};
 
-export interface Lead {
-    id?: string;
-    name: string;
-    email: string;
-    phone?: string;
-    address?: string;
-    serviceType?: string;
-    complexity?: string;
-    description?: string;
-    preferredTime?: string;
-    status: string;
-    createdAt?: string;
-}
+    getLeads: async (): Promise<Lead[]> => {
+        const { data, error } = await supabase
+            .from('leads')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('getLeads error:', error);
+            return [];
+        }
+
+        return data.map((l: any) => ({
+            id: l.id,
+            name: l.name,
+            email: l.email,
+            phone: l.phone,
+            address: l.address,
+            serviceType: l.service_type,
+            complexity: l.complexity,
+            description: l.description,
+            preferredTime: l.preferred_time,
+            status: l.status,
+            createdAt: l.created_at,
+            updatedAt: l.updated_at
+        }));
+    },
+
+    updateLeadStatus: async (id: string, status: string): Promise<void> => {
+        const { error } = await supabase.from('leads').update({ status }).eq('id', id);
+        if (error) throw error;
+    },
+};
 
 // Analytics helper
 export const computeAnalytics = (projects: Project[], invoices: Invoice[], users: User[]): DashboardAnalytics => {

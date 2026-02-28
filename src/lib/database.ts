@@ -1,7 +1,7 @@
 // MSC Electric - Project Management Database Schema
 // This simulates a backend database using localStorage for demo purposes
 
-export type UserRole = 'admin' | 'client' | 'employee' | 'subcontractor';
+export type UserRole = 'admin' | 'client' | 'employee' | 'subcontractor' | 'gc';
 
 export interface User {
   id: string;
@@ -200,6 +200,23 @@ export interface Expense {
 }
 
 export type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'cancelled';
+
+export type LeadStatus = 'new' | 'contacted' | 'scheduled' | 'archived';
+
+export interface Lead {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  serviceType?: string;
+  complexity?: string;
+  description?: string;
+  preferredTime?: string;
+  status: LeadStatus;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Invoice {
   id: string;

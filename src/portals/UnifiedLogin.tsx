@@ -4,7 +4,7 @@ import { Zap, Eye, EyeOff, Lock, User, Building2, HardHat, Wrench, Database } fr
 import { useAuth } from '@/lib/auth-context';
 import { seedSupabase } from '@/utils/seed-data';
 
-type UserType = 'admin' | 'client' | 'employee' | 'subcontractor';
+type UserType = 'admin' | 'client' | 'employee' | 'subcontractor' | 'gc';
 
 interface LoginOption {
   type: UserType;
@@ -47,6 +47,14 @@ const loginOptions: LoginOption[] = [
     description: 'Access assigned projects and submit work completion',
     demoEmail: 'juan.rodriguez@jrelectric.com',
     demoPassword: 'sub123',
+  },
+  {
+    type: 'gc',
+    label: 'GC Partner',
+    icon: Zap,
+    description: 'Upload blueprints, solicit bids, and track developments',
+    demoEmail: 'builder@apexconstruction.com',
+    demoPassword: 'gc123',
   },
 ];
 

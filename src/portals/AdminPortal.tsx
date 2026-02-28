@@ -22,7 +22,8 @@ import {
   DollarSign,
   Clock,
   CheckCircle,
-  Loader2
+  Loader2,
+  Inbox
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import type { Project, Invoice, User } from '@/lib/database';
@@ -49,6 +50,7 @@ import { AdminContracts } from './admin/AdminContracts';
 import { AdminWorkers } from './admin/AdminWorkers';
 import { AdminMap } from './admin/AdminMap';
 import { AdminSettings } from './admin/AdminSettings';
+import { AdminLeads } from './admin/AdminLeads';
 
 const COLORS = ['#F2C94C', '#3B82F6', '#10B981', '#EF4444', '#8B5CF6', '#6B7280'];
 
@@ -347,6 +349,7 @@ export function AdminPortal() {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
+    { id: 'leads', label: 'Leads', icon: Inbox, path: '/admin/leads' },
     { id: 'projects', label: 'Projects', icon: FolderKanban, path: '/admin/projects' },
     { id: 'invoices', label: 'Invoices', icon: Receipt, path: '/admin/invoices' },
     { id: 'contracts', label: 'Contracts', icon: FileText, path: '/admin/contracts' },
@@ -479,6 +482,7 @@ export function AdminPortal() {
         <div className="flex-1 overflow-auto p-4 lg:p-6">
           <Routes>
             <Route path="/" element={<DashboardOverview />} />
+            <Route path="/leads" element={<AdminLeads />} />
             <Route path="/projects" element={<AdminProjects />} />
             <Route path="/invoices" element={<AdminInvoices />} />
             <Route path="/contracts" element={<AdminContracts />} />

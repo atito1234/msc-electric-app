@@ -84,26 +84,26 @@ export interface Project {
   estimatedEndDate?: string;
   actualEndDate?: string;
   progress: number; // 0-100
-  
+
   // Team
   projectManagerId?: string;
   assignedElectricians: string[]; // Employee IDs
   assignedSubcontractors: string[]; // Subcontractor IDs
-  
+
   // Work tracking
   workOrders: WorkOrder[];
   materials: Material[];
   timeEntries: TimeEntry[];
   photos: ProjectPhoto[];
   notes: ProjectNote[];
-  
+
   // Financial
   invoices: string[]; // Invoice IDs
   expenses: Expense[];
-  
+
   // Timeline
   history: ProjectHistoryEntry[];
-  
+
   createdAt: string;
   updatedAt: string;
 }
@@ -209,10 +209,10 @@ export interface Invoice {
   statementOfWorkId?: string;
   invoiceNumber: string;
   status: InvoiceStatus;
-  
+
   // Line items
   items: InvoiceItem[];
-  
+
   // Totals
   subtotal: number;
   taxRate: number;
@@ -221,23 +221,23 @@ export interface Invoice {
   total: number;
   amountPaid: number;
   balanceDue: number;
-  
+
   // Dates
   issueDate: string;
   dueDate: string;
   paidDate?: string;
-  
+
   // Payment
   paymentMethod?: string;
   paymentNotes?: string;
-  
+
   // AI Generation
   aiGenerated: boolean;
   aiPrompt?: string;
-  
+
   notes: string;
   terms: string;
-  
+
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -264,24 +264,24 @@ export interface Contract {
   contractNumber: string;
   title: string;
   status: ContractStatus;
-  
+
   // Value
   totalValue: number;
   paymentTerms: string;
   depositAmount: number;
   depositPaid: boolean;
-  
+
   // Scope
   scopeOfWork: string;
   exclusions: string;
-  
+
   // Timeline
   startDate?: string;
   estimatedCompletion?: string;
-  
+
   // Documents
   statementsOfWork: string[]; // SOW IDs
-  
+
   // Signatures
   clientSigned: boolean;
   clientSignedAt?: string;
@@ -289,10 +289,10 @@ export interface Contract {
   companySigned: boolean;
   companySignedAt?: string;
   companySignature?: string;
-  
+
   // Files
   documentUrl?: string;
-  
+
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -305,23 +305,23 @@ export interface StatementOfWork {
   title: string;
   description: string;
   status: 'draft' | 'approved' | 'in-progress' | 'completed';
-  
+
   // Work details
   tasks: SOWTask[];
   deliverables: Deliverable[];
-  
+
   // Timeline
   startDate: string;
   endDate: string;
   milestones: Milestone[];
-  
+
   // Budget
   estimatedCost: number;
   actualCost: number;
-  
+
   // Team
   assignedWorkers: string[];
-  
+
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -368,22 +368,22 @@ export interface DashboardAnalytics {
   revenueThisMonth: number;
   outstandingInvoices: number;
   overdueInvoices: number;
-  
+
   // Projects by status
   projectsByStatus: Record<ProjectStatus, number>;
-  
+
   // Revenue by month
   revenueByMonth: { month: string; revenue: number; expenses: number }[];
-  
+
   // Top clients
   topClients: { clientId: string; name: string; totalSpent: number; projects: number }[];
-  
+
   // Worker performance
   topWorkers: { workerId: string; name: string; projects: number; rating: number; revenue: number }[];
-  
+
   // Geographic distribution
   projectsByLocation: { state: string; count: number; revenue: number }[];
-  
+
   // Efficiency metrics
   averageProjectDuration: number; // days
   onTimeCompletionRate: number; // percentage
@@ -393,16 +393,16 @@ export interface DashboardAnalytics {
 // Initialize mock data
 const initializeDatabase = () => {
   if (typeof window === 'undefined') return;
-  
+
   // Check if already initialized
   if (localStorage.getItem('msc_db_initialized')) return;
-  
+
   // Create mock users
   const users: User[] = [
     // Admin
     {
       id: 'user-admin-1',
-      email: 'admin@electricalmsc.com',
+      email: 'admin@mscelectric.io',
       password: 'admin123',
       name: 'Admin User',
       role: 'admin',
@@ -464,7 +464,7 @@ const initializeDatabase = () => {
       isActive: true,
     },
   ];
-  
+
   localStorage.setItem('msc_users', JSON.stringify(users));
   localStorage.setItem('msc_db_initialized', 'true');
 };
@@ -472,21 +472,21 @@ const initializeDatabase = () => {
 // Database operations
 export const db = {
   init: initializeDatabase,
-  
+
   // Users
   getUsers: (): User[] => {
     if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem('msc_users') || '[]');
   },
-  
+
   getUserByEmail: (email: string): User | undefined => {
     return db.getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
   },
-  
+
   getUserById: (id: string): User | undefined => {
     return db.getUsers().find(u => u.id === id);
   },
-  
+
   saveUser: (user: User): void => {
     const users = db.getUsers();
     const index = users.findIndex(u => u.id === user.id);
@@ -497,28 +497,28 @@ export const db = {
     }
     localStorage.setItem('msc_users', JSON.stringify(users));
   },
-  
+
   // Projects
   getProjects: (): Project[] => {
     if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem('msc_projects') || '[]');
   },
-  
+
   getProjectById: (id: string): Project | undefined => {
     return db.getProjects().find(p => p.id === id);
   },
-  
+
   getProjectsByClient: (clientId: string): Project[] => {
     return db.getProjects().filter(p => p.clientId === clientId);
   },
-  
+
   getProjectsByWorker: (workerId: string): Project[] => {
-    return db.getProjects().filter(p => 
-      p.assignedElectricians.includes(workerId) || 
+    return db.getProjects().filter(p =>
+      p.assignedElectricians.includes(workerId) ||
       p.assignedSubcontractors.includes(workerId)
     );
   },
-  
+
   saveProject: (project: Project): void => {
     const projects = db.getProjects();
     const index = projects.findIndex(p => p.id === project.id);
@@ -533,30 +533,30 @@ export const db = {
     }
     localStorage.setItem('msc_projects', JSON.stringify(projects));
   },
-  
+
   deleteProject: (id: string): void => {
     const projects = db.getProjects().filter(p => p.id !== id);
     localStorage.setItem('msc_projects', JSON.stringify(projects));
   },
-  
+
   // Invoices
   getInvoices: (): Invoice[] => {
     if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem('msc_invoices') || '[]');
   },
-  
+
   getInvoiceById: (id: string): Invoice | undefined => {
     return db.getInvoices().find(i => i.id === id);
   },
-  
+
   getInvoicesByProject: (projectId: string): Invoice[] => {
     return db.getInvoices().filter(i => i.projectId === projectId);
   },
-  
+
   getInvoicesByClient: (clientId: string): Invoice[] => {
     return db.getInvoices().filter(i => i.clientId === clientId);
   },
-  
+
   saveInvoice: (invoice: Invoice): void => {
     const invoices = db.getInvoices();
     const index = invoices.findIndex(i => i.id === invoice.id);
@@ -571,21 +571,21 @@ export const db = {
     }
     localStorage.setItem('msc_invoices', JSON.stringify(invoices));
   },
-  
+
   // Contracts
   getContracts: (): Contract[] => {
     if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem('msc_contracts') || '[]');
   },
-  
+
   getContractById: (id: string): Contract | undefined => {
     return db.getContracts().find(c => c.id === id);
   },
-  
+
   getContractsByClient: (clientId: string): Contract[] => {
     return db.getContracts().filter(c => c.clientId === clientId);
   },
-  
+
   saveContract: (contract: Contract): void => {
     const contracts = db.getContracts();
     const index = contracts.findIndex(c => c.id === contract.id);
@@ -600,21 +600,21 @@ export const db = {
     }
     localStorage.setItem('msc_contracts', JSON.stringify(contracts));
   },
-  
+
   // Statements of Work
   getSOWs: (): StatementOfWork[] => {
     if (typeof window === 'undefined') return [];
     return JSON.parse(localStorage.getItem('msc_sows') || '[]');
   },
-  
+
   getSOWById: (id: string): StatementOfWork | undefined => {
     return db.getSOWs().find(s => s.id === id);
   },
-  
+
   getSOWsByContract: (contractId: string): StatementOfWork[] => {
     return db.getSOWs().filter(s => s.contractId === contractId);
   },
-  
+
   saveSOW: (sow: StatementOfWork): void => {
     const sows = db.getSOWs();
     const index = sows.findIndex(s => s.id === sow.id);
@@ -629,7 +629,7 @@ export const db = {
     }
     localStorage.setItem('msc_sows', JSON.stringify(sows));
   },
-  
+
   // Clear all data (for testing)
   clearAll: (): void => {
     localStorage.removeItem('msc_users');
@@ -644,18 +644,18 @@ export const db = {
 // Seed data with realistic examples
 export const seedDatabase = () => {
   if (typeof window === 'undefined') return;
-  
+
   // Clear existing
   db.clearAll();
-  
+
   // Initialize with base users
   db.init();
-  
+
   // Add more detailed users
   const users: any[] = [
     {
       id: 'user-admin-1',
-      email: 'admin@electricalmsc.com',
+      email: 'admin@mscelectric.io',
       password: 'admin123',
       name: 'Alexandra Torres',
       role: 'admin',
@@ -774,9 +774,9 @@ export const seedDatabase = () => {
       isActive: true,
     },
   ];
-  
+
   localStorage.setItem('msc_users', JSON.stringify(users));
-  
+
   // Create sample projects
   const projects: Project[] = [
     {
@@ -935,9 +935,9 @@ export const seedDatabase = () => {
       updatedAt: '2024-02-01T00:00:00Z',
     },
   ];
-  
+
   localStorage.setItem('msc_projects', JSON.stringify(projects));
-  
+
   // Create sample invoices
   const invoices: Invoice[] = [
     {
@@ -1058,9 +1058,9 @@ export const seedDatabase = () => {
       sentAt: '2024-01-25T00:00:00Z',
     },
   ];
-  
+
   localStorage.setItem('msc_invoices', JSON.stringify(invoices));
-  
+
   // Create sample contracts
   const contracts: Contract[] = [
     {
@@ -1088,9 +1088,9 @@ export const seedDatabase = () => {
       updatedAt: '2024-01-12T00:00:00Z',
     },
   ];
-  
+
   localStorage.setItem('msc_contracts', JSON.stringify(contracts));
-  
+
   // Create sample SOWs
   const sows: StatementOfWork[] = [
     {
@@ -1122,9 +1122,9 @@ export const seedDatabase = () => {
       updatedAt: '2024-01-20T00:00:00Z',
     },
   ];
-  
+
   localStorage.setItem('msc_sows', JSON.stringify(sows));
-  
+
   console.log('Database seeded successfully!');
 };
 
@@ -1133,11 +1133,11 @@ export const calculateAnalytics = (): DashboardAnalytics => {
   const projects = db.getProjects();
   const invoices = db.getInvoices();
   const users = db.getUsers();
-  
+
   const now = new Date();
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
-  
+
   // Revenue by month (last 6 months)
   const revenueByMonth: { month: string; revenue: number; expenses: number }[] = [];
   for (let i = 5; i >= 0; i--) {
@@ -1145,7 +1145,7 @@ export const calculateAnalytics = (): DashboardAnalytics => {
     const monthKey = d.toLocaleString('default', { month: 'short' });
     revenueByMonth.push({ month: monthKey, revenue: 0, expenses: 0 });
   }
-  
+
   invoices.forEach(inv => {
     const invDate = new Date(inv.issueDate);
     const monthIndex = revenueByMonth.findIndex(m => m.month === invDate.toLocaleString('default', { month: 'short' }));
@@ -1153,7 +1153,7 @@ export const calculateAnalytics = (): DashboardAnalytics => {
       revenueByMonth[monthIndex].revenue += inv.total;
     }
   });
-  
+
   // Top clients
   const clients = users.filter(u => u.role === 'client') as any[];
   const topClients = clients
@@ -1165,7 +1165,7 @@ export const calculateAnalytics = (): DashboardAnalytics => {
     }))
     .sort((a, b) => b.totalSpent - a.totalSpent)
     .slice(0, 5);
-  
+
   // Top workers
   const workers = users.filter(u => u.role === 'employee' || u.role === 'subcontractor') as any[];
   const topWorkers = workers
@@ -1178,7 +1178,7 @@ export const calculateAnalytics = (): DashboardAnalytics => {
     }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
-  
+
   return {
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.status === 'in-progress').length,

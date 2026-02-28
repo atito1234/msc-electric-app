@@ -21,7 +21,7 @@ const loginOptions: LoginOption[] = [
     label: 'Administrator',
     icon: Building2,
     description: 'Full system access - manage all projects, invoices, and users',
-    demoEmail: 'admin@electricalmsc.com',
+    demoEmail: 'admin@mscelectric.io',
     demoPassword: 'admin123',
   },
   {

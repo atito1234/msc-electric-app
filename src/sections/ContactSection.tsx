@@ -133,7 +133,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <p className="font-mono text-xs text-[#A9AFB8]">Email</p>
-                  <p className="text-[#F6F7F9]">tino@electricalmsc.com</p>
+                  <p className="text-[#F6F7F9]">admin@mscelectric.io</p>
                 </div>
               </div>
 

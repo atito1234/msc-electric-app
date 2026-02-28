@@ -22,12 +22,12 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Simple demo authentication
-    if (email === 'admin@electricalmsc.com' && password === 'admin123') {
+    if (email === 'admin@mscelectric.io' && password === 'admin123') {
       onLogin();
       toast.success('Welcome back, Admin!');
       navigate('/admin');
     } else {
-      toast.error('Invalid credentials. Try admin@electricalmsc.com / admin123');
+      toast.error('Invalid credentials. Try admin@mscelectric.io / admin123');
     }
 
     setIsLoading(false);
@@ -72,7 +72,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full bg-white/5 border border-white/10 rounded-lg pl-12 pr-4 py-3 text-[#F6F7F9] placeholder:text-[#6A6D75] focus:outline-none focus:border-[#F2C94C] transition-colors"
-                  placeholder="admin@electricalmsc.com"
+                  placeholder="admin@mscelectric.io"
                 />
               </div>
             </div>
@@ -117,7 +117,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           {/* Demo Credentials */}
           <div className="mt-6 p-4 bg-[#F2C94C]/10 rounded-lg">
             <p className="text-[#F2C94C] text-xs font-mono text-center">
-              Demo: admin@electricalmsc.com / admin123
+              Demo: admin@mscelectric.io / admin123
             </p>
           </div>
 

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { ArrowDown, X, Home, Image as ImageIcon, Zap, Shield, Cpu, Lightbulb, Phone } from 'lucide-react';
+import { ArrowDown, X, Home, Image as ImageIcon, Zap, Shield, Cpu, Lightbulb, Phone, LogIn } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -93,6 +93,7 @@ export function FloatingNav() {
         { label: 'Smart', icon: Cpu, action: () => scrollToSection('smart') },
         { label: 'Light', icon: Lightbulb, action: () => scrollToSection('lighting') },
         { label: 'Contact', icon: Phone, action: () => scrollToSection('contact') },
+        { label: 'Login', icon: LogIn, action: () => { navigate('/login'); setIsOpen(false); } },
     ];
 
     return (

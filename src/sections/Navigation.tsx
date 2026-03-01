@@ -48,16 +48,15 @@ export function Navigation() {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled 
-          ? 'bg-[#0B0C0F]/90 backdrop-blur-md py-4' 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
+          ? 'bg-[#0B0C0F]/90 backdrop-blur-md py-4'
           : 'bg-transparent py-6'
-      }`}
+        }`}
     >
       <div className="px-[4vw] flex items-center justify-between">
         {/* Logo */}
-        <a 
-          href="#" 
+        <a
+          href="#"
           onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
           className="flex items-center gap-2 group"
         >
@@ -81,19 +80,19 @@ export function Navigation() {
                 </button>
               ))}
             </div>
-            <div 
+            <div
               ref={underlineRef}
               className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#F2C94C] origin-left"
             />
           </div>
-          <a 
+          <a
             href="#/login"
-            className="font-mono text-sm text-[#A9AFB8] hover:text-[#F6F7F9] transition-colors duration-300 flex items-center gap-2"
+            className="font-mono text-sm text-[#F2C94C] hover:text-[#F1C40F] transition-colors duration-300 flex items-center gap-2 border border-[#F2C94C]/30 px-4 py-1.5 rounded-full hover:bg-[#F2C94C]/10"
           >
             <LogIn className="w-4 h-4" />
-            Portal
+            Client Login
           </a>
-          <button 
+          <button
             onClick={() => scrollToSection('contact')}
             className="btn-primary"
           >
@@ -123,14 +122,14 @@ export function Navigation() {
                 {link.label}
               </button>
             ))}
-            <a 
+            <a
               href="#/login"
-              className="font-mono text-sm text-[#A9AFB8] hover:text-[#F6F7F9] transition-colors duration-300 text-left py-2 flex items-center gap-2"
+              className="font-mono text-sm text-[#F2C94C] hover:text-[#F1C40F] transition-colors duration-300 text-left py-2 flex items-center gap-2"
             >
               <LogIn className="w-4 h-4" />
-              Portal Login
+              Already have an account? Log in
             </a>
-            <button 
+            <button
               onClick={() => scrollToSection('contact')}
               className="btn-primary mt-4 w-full"
             >

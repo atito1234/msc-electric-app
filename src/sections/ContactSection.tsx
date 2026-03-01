@@ -18,6 +18,7 @@ export function ContactSection() {
     phone: '',
     projectType: '',
     message: '',
+    portalAccess: false,
   });
 
   useEffect(() => {
@@ -97,13 +98,18 @@ export function ContactSection() {
       phone: '',
       projectType: '',
       message: '',
+      portalAccess: false,
     });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    // @ts-ignore
+    const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
+
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -118,11 +124,11 @@ export function ContactSection() {
           {/* Left Column - Info */}
           <div ref={leftRef}>
             <h2 className="font-display font-bold text-4xl md:text-5xl text-[#F6F7F9] mb-4">
-              Ready to power your next project?
+              Register Your Project
             </h2>
             <div ref={underlineRef} className="w-24 h-[2px] bg-[#F2C94C] origin-left mb-6" />
             <p className="text-[#A9AFB8] text-lg mb-8">
-              Tell us what you need. We'll respond within one business day.
+              Submit your details below. Once reviewed, we will email you secure credentials to log into our active project portal.
             </p>
 
             {/* Contact Info */}
@@ -232,11 +238,25 @@ export function ContactSection() {
                 />
               </div>
 
+              <div className="flex items-start gap-3 mt-4 mb-4">
+                <input
+                  type="checkbox"
+                  id="portalAccess"
+                  name="portalAccess"
+                  checked={formData.portalAccess}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 accent-[#F2C94C] cursor-pointer"
+                />
+                <label htmlFor="portalAccess" className="text-sm text-[#A9AFB8] cursor-pointer leading-tight">
+                  Set up my Client/Partner Portal account to track this project.
+                </label>
+              </div>
+
               <button
                 type="submit"
                 className="w-full btn-primary flex items-center justify-center gap-2 py-4"
               >
-                Send Message
+                Submit Request & Register
                 <Send className="w-4 h-4" />
               </button>
             </form>

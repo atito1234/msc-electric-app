@@ -46,7 +46,7 @@ const loginOptions: LoginOption[] = [
     icon: Wrench,
     description: 'Access assigned projects and submit work completion',
     demoEmail: 'juan.rodriguez@jrelectric.com',
-    demoPassword: 'sub123',
+    demoPassword: 'sub123456',
   },
   {
     type: 'gc',
@@ -54,7 +54,7 @@ const loginOptions: LoginOption[] = [
     icon: Zap,
     description: 'Upload blueprints, solicit bids, and track developments',
     demoEmail: 'builder@apexconstruction.com',
-    demoPassword: 'gc123',
+    demoPassword: 'gc123456',
   },
 ];
 

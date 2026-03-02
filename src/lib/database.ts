@@ -83,6 +83,8 @@ export interface Project {
   startDate?: string;
   estimatedEndDate?: string;
   actualEndDate?: string;
+  documentUrl?: string; // URL to the uploaded RFP/blueprint in Storage
+  aiQuoteStatus?: 'pending' | 'processing' | 'completed' | 'failed'; // Status of automated estimation
   progress: number; // 0-100
 
   // Team

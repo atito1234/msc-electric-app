@@ -1,8 +1,9 @@
 import { useRef, useLayoutEffect, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { db } from '@/lib/supabase-database';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,6 +21,7 @@ export function ContactSection() {
     message: '',
     portalAccess: false,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const handlePrefill = (e: CustomEvent) => {
@@ -89,17 +91,38 @@ export function ContactSection() {
     return () => ctx.revert();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Message sent! We\'ll respond within one business day.');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      projectType: '',
-      message: '',
-      portalAccess: false,
-    });
+    setIsSubmitting(true);
+
+    try {
+      await db.saveLead({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        serviceType: formData.projectType || 'General Request',
+        complexity: 'simple',
+        description: formData.portalAccess
+          ? `[REQUESTED PORTAL ACCESS]\n\n${formData.message}`
+          : formData.message,
+        status: 'new'
+      });
+
+      toast.success('Request received! We will be in contact shortly.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        projectType: '',
+        message: '',
+        portalAccess: false,
+      });
+    } catch (error) {
+      console.error('Failed to submit form:', error);
+      toast.error('Unable to submit request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -254,10 +277,20 @@ export function ContactSection() {
 
               <button
                 type="submit"
-                className="w-full btn-primary flex items-center justify-center gap-2 py-4"
+                disabled={isSubmitting}
+                className="w-full btn-primary flex items-center justify-center gap-2 py-4 disabled:opacity-50"
               >
-                Submit Request & Register
-                <Send className="w-4 h-4" />
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    Submit Request & Register
+                    <Send className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </form>
           </div>

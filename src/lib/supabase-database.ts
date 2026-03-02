@@ -13,6 +13,8 @@ const mapProjectFromDB = (p: any): Project => ({
     startDate: p.start_date,
     estimatedEndDate: p.estimated_end_date,
     actualEndDate: p.actual_end_date,
+    documentUrl: p.document_url,
+    aiQuoteStatus: p.ai_quote_status,
     projectManagerId: p.project_manager_id,
     // Ensure strict types for arrays if DB returns null
     materials: p.materials || [],
@@ -187,6 +189,8 @@ export const db = {
             assigned_electricians: project.assignedElectricians,
             assigned_subcontractors: project.assignedSubcontractors,
             start_date: project.startDate,
+            document_url: project.documentUrl,
+            ai_quote_status: project.aiQuoteStatus,
             // ...
         };
 

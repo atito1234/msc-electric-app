@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { FloatingNav } from '@/components/ui/FloatingNav';
+import { Navigation } from '@/sections/Navigation';
 import { SplitHero } from '@/components/ui/SplitHero';
 import { PanelSection } from '@/sections/PanelSection';
 import { AlwaysOnSection } from '@/sections/AlwaysOnSection';
@@ -73,6 +74,7 @@ export function MarketingSite() {
       <div className="grain-overlay" />
 
       {/* Navigation */}
+      <Navigation />
       <FloatingNav />
       <ServiceSideNav />
 

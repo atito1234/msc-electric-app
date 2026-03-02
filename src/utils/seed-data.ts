@@ -6,8 +6,8 @@ const DEMO_USERS = [
     { role: 'admin', email: 'admin@mscelectric.io', password: 'admin123', name: 'Admin User', hourly_rate: 0 },
     { role: 'client', email: 'johnson.family@email.com', password: 'client123', name: 'Michael Johnson', hourly_rate: 0 },
     { role: 'employee', email: 'carlos.martinez@mscelectric.com', password: 'employee123', name: 'Carlos Martinez', hourly_rate: 85 },
-    { role: 'subcontractor', email: 'juan.rodriguez@jrelectric.com', password: 'sub123', name: 'Juan Rodriguez', hourly_rate: 75 },
-    { role: 'gc', email: 'builder@apexconstruction.com', password: 'gc123', name: 'Apex Construction', hourly_rate: 0 }
+    { role: 'subcontractor', email: 'juan.rodriguez@jrelectric.com', password: 'sub123456', name: 'Juan Rodriguez', hourly_rate: 75 },
+    { role: 'gc', email: 'builder@apexconstruction.com', password: 'gc123456', name: 'Apex Construction', hourly_rate: 0 }
 ];
 
 export const seedSupabase = async () => {
@@ -16,31 +16,32 @@ export const seedSupabase = async () => {
 
         // 1. Create Users (Sequentially to manage session switching)
         for (const user of DEMO_USERS) {
-            // Sign up (or sign in if already exists and auto-confirm is on)
-            const { data, error } = await supabase.auth.signUp({
+            // 1. Try signing in first to avoid triggering brute-force signup rate limiters
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
                 email: user.email,
-                password: user.password,
-                options: {
-                    data: {
-                        name: user.name,
-                        role: user.role,
-                    }
-                }
+                password: user.password
             });
 
-            if (error) {
-                console.warn(`Error signing up ${user.role}:`, error.message);
-                // Try signing in if sign up failed (e.g. already exists)
-                const { data: signInData } = await supabase.auth.signInWithPassword({
+            if (signInData.user) {
+                userIds[user.role] = signInData.user.id;
+            } else {
+                // 2. Sign up if user does not exist
+                const { data, error } = await supabase.auth.signUp({
                     email: user.email,
-                    password: user.password
+                    password: user.password,
+                    options: {
+                        data: {
+                            name: user.name,
+                            role: user.role,
+                        }
+                    }
                 });
 
-                if (signInData.user) {
-                    userIds[user.role] = signInData.user.id;
+                if (error) {
+                    throw new Error(`Error signing up ${user.role}: ${error.message}`);
+                } else if (data.user) {
+                    userIds[user.role] = data.user.id;
                 }
-            } else if (data.user) {
-                userIds[user.role] = data.user.id;
             }
 
             // Create/Update Profile
@@ -51,7 +52,6 @@ export const seedSupabase = async () => {
                     name: user.name,
                     role: user.role,
                     hourly_rate: user.hourly_rate,
-                    is_active: true,
                     created_at: new Date().toISOString()
                 });
 
@@ -72,7 +72,7 @@ export const seedSupabase = async () => {
             password: adminCreds.password
         });
 
-        if (loginError) throw new Error('Failed to login as admin for seeding data');
+        if (loginError) throw new Error(`Failed to login as admin for seeding data: ${loginError.message}`);
 
         if (!userIds['client']) throw new Error('Client user not created, cannot seed projects');
 

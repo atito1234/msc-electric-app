@@ -26,7 +26,7 @@ import {
   Inbox
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import type { Project, Invoice, User } from '@/lib/database';
+import type { Project, Invoice, User, Lead } from '@/lib/database';
 import { db, computeAnalytics } from '@/lib/supabase-database';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -340,7 +340,14 @@ export function AdminPortal() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [notifications] = useState(3);
+
+  // Fetch leads to dynamically calculate notifications from chatbots and forms
+  const { data: leads = [] } = useQuery<Lead[]>({
+    queryKey: ['admin-leads'],
+    queryFn: db.getLeads,
+  });
+
+  const notifications = leads.filter(l => l.status === 'new').length;
 
   // Redirect if not admin
   if (!user || user.role !== 'admin') {
@@ -412,7 +419,7 @@ export function AdminPortal() {
             >
               <item.icon className="w-5 h-5" />
               <span className="font-medium text-sm">{item.label}</span>
-              {item.id === 'invoices' && notifications > 0 && (
+              {item.id === 'leads' && notifications > 0 && (
                 <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {notifications}
                 </span>

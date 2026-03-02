@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { AIProjectEstimator } from '@/components/ui/AIProjectEstimator';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -37,6 +38,7 @@ export function ClientPortal() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const [showAIEstimator, setShowAIEstimator] = useState(false);
 
   const { data: projects = [], isLoading: isLoadingProjects } = useQuery<Project[]>({
     queryKey: ['projects', user?.id],
@@ -184,13 +186,22 @@ export function ClientPortal() {
           {activeTab === 'dashboard' && (
             <div className="space-y-8">
               {/* Welcome */}
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">
-                  Welcome back, {user?.name.split(' ')[0]}!
-                </h1>
-                <p className="text-zinc-400">
-                  Here's what's happening with your projects
-                </p>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-2">
+                    Welcome back, {user?.name.split(' ')[0]}!
+                  </h1>
+                  <p className="text-zinc-400">
+                    Here's what's happening with your projects.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowAIEstimator(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold shrink-0 h-12 shadow-lg shadow-blue-900/20"
+                >
+                  <MessageSquare className="w-5 h-5 mr-no-blue" />
+                  Start New Project w/ AI Estimator
+                </Button>
               </div>
 
               {/* Stats */}
@@ -675,6 +686,12 @@ export function ClientPortal() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* AI Estimator Modal */}
+      <AIProjectEstimator
+        isOpen={showAIEstimator}
+        onClose={() => setShowAIEstimator(false)}
+      />
     </div>
   );
 }

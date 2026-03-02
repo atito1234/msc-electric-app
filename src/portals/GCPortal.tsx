@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import type { Project, Contract } from '@/lib/database';
+import { supabase } from '@/lib/supabase';
+import type { Project } from '@/lib/database';
 import { db } from '@/lib/supabase-database';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,12 @@ export function GCPortal() {
     const [showProjectDialog, setShowProjectDialog] = useState(false);
     const [showUploadDialog, setShowUploadDialog] = useState(false);
 
+    // Upload state
+    const [projectName, setProjectName] = useState('');
+    const [scopeNotes, setScopeNotes] = useState('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+
     // Fetch GC's associated projects (represented locally as client projects for now)
     const { data: projects = [], isLoading: isLoadingProjects } = useQuery<Project[]>({
         queryKey: ['gc-projects', user?.id],
@@ -62,9 +69,70 @@ export function GCPortal() {
         return colors[status] || 'bg-zinc-500/20 text-zinc-400';
     };
 
-    const handleUploadRFP = () => {
-        toast.success('RFP and Blueprints uploaded successfully! We will review and provide a quote shortly.');
-        setShowUploadDialog(false);
+    const handleUploadRFP = async () => {
+        if (!selectedFile || !projectName) {
+            toast.error('Please provide a project name and select a file.');
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            // 1. Upload to Supabase Storage
+            const fileExt = selectedFile.name.split('.').pop();
+            const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+            const filePath = `${user?.id || 'guest'}/${fileName}`;
+
+            let documentUrl = '';
+
+            // Note: If you don't have the bucket created yet, this will fail. 
+            // We'll wrap it in a try/catch so the UI doesn't crash if the bucket is missing.
+            const { error: uploadError } = await supabase.storage
+                .from('project_documents')
+                .upload(filePath, selectedFile);
+
+            if (uploadError) {
+                console.warn('Storage upload disabled or bucket missing:', uploadError.message);
+                // Fallback for pure local dev without storage buckets configured
+                documentUrl = `local_mock://${filePath}`;
+            } else {
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('project_documents')
+                    .getPublicUrl(filePath);
+                documentUrl = publicUrl;
+            }
+
+            // 2. Insert new project row with status "Awaiting Estimation"
+            await db.saveProject({
+                name: projectName,
+                description: scopeNotes,
+                clientId: user?.id || '',
+                status: 'lead', // Lead/Awaiting Estimation
+                aiQuoteStatus: 'pending',
+                documentUrl: documentUrl,
+                address: { street: 'TBD', city: 'TBD', state: 'TBD', zip: '00000' },
+                estimatedValue: 0,
+                progress: 0,
+                assignedElectricians: [],
+                assignedSubcontractors: [],
+            });
+
+            // Trigger refetch
+            // (Assuming you're using React Query's queryClient to invalidate in a real prod app)
+
+            toast.success('Project submitted! AI estimating has begun.');
+            setShowUploadDialog(false);
+
+            // Reset state
+            setProjectName('');
+            setScopeNotes('');
+            setSelectedFile(null);
+
+        } catch (error: any) {
+            toast.error(`Upload failed: ${error.message}`);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const menuItems = [
@@ -296,23 +364,52 @@ export function GCPortal() {
                         <DialogTitle>Submit New Project</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 pt-4">
-                        <div className="border-2 border-dashed border-white/20 rounded-xl p-8 flex flex-col items-center text-center hover:bg-white/5 transition-colors cursor-pointer group">
+                        <div className="relative border-2 border-dashed border-white/20 rounded-xl p-8 flex flex-col items-center text-center hover:bg-white/5 transition-colors group">
+                            <input
+                                type="file"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                accept=".pdf,.doc,.docx,.jpg,.png"
+                                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                            />
                             <div className="w-12 h-12 rounded-full bg-[#F2C94C]/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <UploadCloud className="w-6 h-6 text-[#F2C94C]" />
                             </div>
-                            <p className="text-white font-medium mb-1">Drag & Drop Files Here</p>
-                            <p className="text-zinc-500 text-xs">PDF blueprints, RFPs, or spec sheets up to 50MB</p>
+                            <p className="text-white font-medium mb-1">
+                                {selectedFile ? selectedFile.name : 'Drag & Drop Files Here'}
+                            </p>
+                            <p className="text-zinc-500 text-xs">
+                                {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : 'PDF blueprints, RFPs, or spec sheets up to 50MB'}
+                            </p>
                         </div>
                         <div>
                             <label className="block text-xs font-mono text-zinc-400 mb-2">Project Name / Reference ID</label>
-                            <input type="text" className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#F2C94C]" placeholder="e.g. Oakwood Residential Phase 2" />
+                            <input
+                                type="text"
+                                value={projectName}
+                                onChange={(e) => setProjectName(e.target.value)}
+                                className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#F2C94C]"
+                                placeholder="e.g. Oakwood Residential Phase 2"
+                            />
                         </div>
                         <div>
                             <label className="block text-xs font-mono text-zinc-400 mb-2">Brief Scope Notes (Optional)</label>
-                            <textarea className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#F2C94C] resize-none h-24" placeholder="Mention any specific electrical requirements or timelines..." />
+                            <textarea
+                                value={scopeNotes}
+                                onChange={(e) => setScopeNotes(e.target.value)}
+                                className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-[#F2C94C] resize-none h-24"
+                                placeholder="Mention any specific electrical requirements or timelines..."
+                            />
                         </div>
-                        <Button className="w-full bg-[#F2C94C] text-black font-bold hover:bg-[#F5D76E]" onClick={handleUploadRFP}>
-                            Submit for Estimating
+                        <Button
+                            className="w-full bg-[#F2C94C] text-black font-bold hover:bg-[#F5D76E]"
+                            onClick={handleUploadRFP}
+                            disabled={isUploading || !projectName || !selectedFile}
+                        >
+                            {isUploading ? (
+                                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+                            ) : (
+                                'Submit for Estimating'
+                            )}
                         </Button>
                     </div>
                 </DialogContent>

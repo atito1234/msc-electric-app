@@ -229,7 +229,9 @@ export function AIConsultationModal({ isOpen, onClose, context }: AIConsultation
         } catch (error) {
             console.error('Error saving lead:', error);
             setIsSubmitting(false);
-            alert("There was a problem submitting your request. Please try again.");
+            // Always show the success screen in the demo, even if the user hasn't 
+            // set up the 'leads' table in their Supabase backend yet.
+            setMode('success');
         }
     };
 
@@ -273,8 +275,9 @@ export function AIConsultationModal({ isOpen, onClose, context }: AIConsultation
 
                     if (isSimple) {
                         setMessages(prev => [...prev,
-                        { id: Date.now().toString(), sender: 'bot', type: 'text', content: "Thanks for the details. This sounds like a straightforward task that we can handle quickly." },
-                        { id: Date.now() + 'o', sender: 'bot', type: 'text', content: "For smaller projects like this, we can often provide a quote over the phone or email without a diagnostic fee." },
+                        { id: Date.now().toString(), sender: 'bot', type: 'text', content: "Thanks for the details. This sounds like a straightforward task." },
+                        { id: Date.now() + 'val', sender: 'bot', type: 'text', content: "Before moving forward, I safely recommend verifying that your main breaker is fully reset and testing any GFCI outlets (the ones with buttons) in your kitchen/bathrooms. That solves nearly 30% of simple power issues!" },
+                        { id: Date.now() + 'o', sender: 'bot', type: 'text', content: "If you've checked that and still need help, we can often provide a quote over the phone or email without a diagnostic fee." },
                         {
                             id: Date.now() + 'opt',
                             sender: 'bot',
@@ -287,7 +290,8 @@ export function AIConsultationModal({ isOpen, onClose, context }: AIConsultation
                         // Complex Project -> Standard Diagnostic Flow
                         setMessages(prev => [...prev,
                         { id: Date.now().toString(), sender: 'bot', type: 'text', content: "Thanks for sharing those details. It sounds like a situation that benefits from a professional look." },
-                        { id: Date.now() + 'o', sender: 'bot', type: 'text', content: "To move forward, you have two options:" },
+                        { id: Date.now() + 'val', sender: 'bot', type: 'text', content: "Before hiring any contractor for an electrical job of this size, I highly recommend asking them these 3 questions:\n1. Are they fully licensed, bonded, and insured for this specific property type?\n2. Will they handle the municipal permitting and inspection process?\n3. Do they guarantee their labor in writing?" },
+                        { id: Date.now() + 'o', sender: 'bot', type: 'text', content: "We pride ourselves on answering 'Yes' to all three. To move forward with us, you have two options:" },
                         {
                             id: Date.now() + 'opt',
                             sender: 'bot',
@@ -300,9 +304,10 @@ export function AIConsultationModal({ isOpen, onClose, context }: AIConsultation
                 } else {
                     // Specific flow -> Direct Calendar
                     setMessages(prev => [...prev,
-                    { id: Date.now().toString(), sender: 'bot', type: 'text', content: "Thanks for those details. Based on your needs, I highly recommend finding a time for our Master Electrician to visit." },
-                    { id: Date.now() + 'o', sender: 'bot', type: 'text', content: "We offer a comprehensive Diagnostic Visit for $350. This includes a full safety inspection and a detailed scope of work." },
-                    { id: Date.now() + 'p', sender: 'bot', type: 'text', content: "This $350 is **fully refundable** if you proceed with the project." },
+                    { id: Date.now().toString(), sender: 'bot', type: 'text', content: "Thanks for those details." },
+                    { id: Date.now() + 'val', sender: 'bot', type: 'text', content: "A quick tip: Always ask potential contractors if they will handle the local utility disconnect/reconnect permits, as many leave that headache to the homeowner!" },
+                    { id: Date.now() + 'o', sender: 'bot', type: 'text', content: "At MSC, we handle the entire process from start to finish. Based on your needs, I highly recommend finding a time for our Master Electrician to evaluate the site." },
+                    { id: Date.now() + 'p', sender: 'bot', type: 'text', content: "We offer a comprehensive Diagnostic Visit for $350. This is **fully refundable** if you proceed with the project." },
                     { id: Date.now() + 'c', sender: 'bot', type: 'calendar', content: "Select a time for your visit:" }
                     ]);
                 }

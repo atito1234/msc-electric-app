@@ -78,6 +78,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
 
+    // DEMO Bypass: Avoids Supabase free-tier rate limits for UI testing
+    const demoUsers: Record<string, { role: UserRole, name: string, pass: string }> = {
+      'admin@mscelectric.io': { role: 'admin', name: 'Admin User', pass: 'admin123' },
+      'johnson.family@email.com': { role: 'client', name: 'Michael Johnson', pass: 'client123' },
+      'carlos.martinez@mscelectric.com': { role: 'employee', name: 'Carlos Martinez', pass: 'employee123' },
+      'juan.rodriguez@jrelectric.com': { role: 'subcontractor', name: 'Juan Rodriguez', pass: 'sub123456' },
+      'builder@apexconstruction.com': { role: 'gc', name: 'Apex Construction', pass: 'gc123456' },
+    };
+
+    if (demoUsers[email] && password === demoUsers[email].pass) {
+      setUser({
+        id: `mock-${demoUsers[email].role}-id`,
+        email: email,
+        password: '', // Required by the legacy User type
+        name: demoUsers[email].name,
+        role: demoUsers[email].role,
+        isActive: true,
+        createdAt: new Date().toISOString()
+      } as User);
+      setIsLoading(false);
+      toast.success('Welcome back! (Demo Mode)');
+      return true;
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,

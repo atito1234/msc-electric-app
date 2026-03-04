@@ -14,6 +14,8 @@ import type { Lead, Project } from '@/lib/database';
 interface ClientJourneyTrackerProps {
     lead: Lead;
     project?: Project;
+    isAdmin?: boolean;
+    onUpdateStatus?: (status: string, milestoneType: 'lead' | 'project', requiredProgress?: number) => void;
 }
 
 const MILESTONES = [
@@ -31,7 +33,7 @@ const MILESTONES = [
     { id: 'job_completed', label: 'Job Completed!', type: 'project', requiredProgress: 100, icon: CheckCircle2 },
 ];
 
-export function ClientJourneyTracker({ lead, project }: ClientJourneyTrackerProps) {
+export function ClientJourneyTracker({ lead, project, isAdmin, onUpdateStatus }: ClientJourneyTrackerProps) {
     // Determine current step index based on lead status and project progress
     let currentStepIndex = 0;
 
@@ -96,7 +98,15 @@ export function ClientJourneyTracker({ lead, project }: ClientJourneyTrackerProp
                             const isFuture = idx > currentStepIndex;
 
                             return (
-                                <div key={milestone.id} className="flex md:flex-col items-center gap-4 md:gap-3 z-10 group cursor-default">
+                                <div
+                                    key={milestone.id}
+                                    className={`flex md:flex-col items-center gap-4 md:gap-3 z-10 group ${isAdmin ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
+                                    onClick={() => {
+                                        if (isAdmin && onUpdateStatus) {
+                                            onUpdateStatus(milestone.requiredStatus as string, milestone.type as 'lead' | 'project', milestone.requiredProgress);
+                                        }
+                                    }}
+                                >
                                     {/* Visual Node */}
                                     <div className="relative">
                                         <div

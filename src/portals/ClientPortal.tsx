@@ -46,12 +46,14 @@ export function ClientPortal() {
     queryKey: ['projects', user?.id],
     queryFn: () => user ? db.getProjectsByClient(user.id) : Promise.resolve([]),
     enabled: !!user,
+    refetchInterval: 5000,
   });
 
   const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery<Invoice[]>({
     queryKey: ['invoices', user?.id],
     queryFn: () => user ? db.getInvoicesByClient(user.id) : Promise.resolve([]),
     enabled: !!user,
+    refetchInterval: 5000,
   });
 
   const { data: contracts = [], isLoading: isLoadingContracts } = useQuery<Contract[]>({
@@ -67,8 +69,9 @@ export function ClientPortal() {
 
   const { data: requests = [], isLoading: isLoadingRequests } = useQuery<Lead[]>({
     queryKey: ['requests', user?.email],
-    queryFn: () => user ? db.getClientRequests(user.email) : Promise.resolve([]),
-    enabled: !!user,
+    queryFn: () => user?.email ? db.getLeadsByEmail(user.email) : Promise.resolve([]),
+    enabled: !!user?.email,
+    refetchInterval: 5000,
   });
 
   const isLoading = isLoadingProjects || isLoadingInvoices || isLoadingContracts || isLoadingRequests;

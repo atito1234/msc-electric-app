@@ -264,6 +264,15 @@ export interface Invoice {
   viewedAt?: string;
 }
 
+export interface Database {
+  // ... other methods ...
+  // Leads
+  getLeads(): Promise<Lead[]>;
+  getLeadsByEmail(email: string): Promise<Lead[]>;
+  updateLeadStatus(id: string, status: string): Promise<void>;
+  // ... other methods ...
+}
+
 export interface InvoiceItem {
   id: string;
   description: string;

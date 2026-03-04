@@ -327,19 +327,37 @@ export const db = {
 
     // Leads
     saveLead: async (lead: Partial<Lead>): Promise<void> => {
-        const dbLead = {
-            name: lead.name,
-            email: lead.email,
-            phone: lead.phone,
-            address: lead.address,
-            service_type: lead.serviceType,
-            complexity: lead.complexity,
-            description: lead.description,
-            preferred_time: lead.preferredTime,
-            status: lead.status || 'new'
-        };
-        const { error } = await supabase.from('leads').insert(dbLead);
-        if (error) throw error;
+        try {
+            // Priority 1: Route through the Edge Function to handle emails and user creation securely
+            const { error: edgeError, data } = await supabase.functions.invoke('process-contact-request', {
+                body: lead
+            });
+
+            if (edgeError) {
+                console.warn('Edge function failed or not deployed. Falling back to direct database insertion.', edgeError);
+                throw edgeError;
+            }
+
+            if (data?.error) {
+                console.warn('Edge function payload error. Falling back.', data.error);
+                throw new Error(data.error);
+            }
+        } catch (err) {
+            // Priority 2: Fallback to direct insert for local environments without Deno / Functions deployed
+            const dbLead = {
+                name: lead.name,
+                email: lead.email,
+                phone: lead.phone,
+                address: lead.address,
+                service_type: lead.serviceType,
+                complexity: lead.complexity,
+                description: lead.description,
+                preferred_time: lead.preferredTime,
+                status: lead.status || 'new'
+            };
+            const { error } = await supabase.from('leads').insert(dbLead);
+            if (error) throw error;
+        }
     },
 
     getLeads: async (): Promise<Lead[]> => {

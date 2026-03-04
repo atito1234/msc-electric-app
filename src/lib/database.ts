@@ -265,12 +265,42 @@ export interface Invoice {
 }
 
 export interface Database {
-  // ... other methods ...
+  // Initialization
+  init?(): void;
+
+  // Users
+  getUsers(): Promise<User[]> | User[];
+  getUserByEmail(email: string): Promise<User | undefined> | (User | undefined);
+  getUserById(id: string): Promise<User | undefined> | (User | undefined);
+  saveUser(user: Partial<User>): Promise<void> | void;
+
+  // Projects
+  getProjects(): Promise<Project[]> | Project[];
+  getProjectById(id: string): Promise<Project | undefined> | (Project | undefined);
+  getProjectsByClient(clientId: string): Promise<Project[]> | Project[];
+  getProjectsByWorker(workerId: string): Promise<Project[]> | Project[];
+  saveProject(project: Partial<Project> & { id?: string }): Promise<void> | void;
+  deleteProject?(id: string): Promise<void> | void;
+
+  // Invoices
+  getInvoices(): Promise<Invoice[]> | Invoice[];
+  getInvoiceById(id: string): Promise<Invoice | undefined> | (Invoice | undefined);
+  getInvoicesByProject(projectId: string): Promise<Invoice[]> | Invoice[];
+  getInvoicesByClient(clientId: string): Promise<Invoice[]> | Invoice[];
+  saveInvoice(invoice: Partial<Invoice> & { id?: string }): Promise<void> | void;
+
+  // Contracts
+  getContracts?(): Promise<Contract[]> | Contract[];
+  getContractById?(id: string): Promise<Contract | undefined> | (Contract | undefined);
+  getContractsByClient?(clientId: string): Promise<Contract[]> | Contract[];
+  saveContract?(contract: Partial<Contract> & { id?: string }): Promise<void> | void;
+
   // Leads
-  getLeads(): Promise<Lead[]>;
-  getLeadsByEmail(email: string): Promise<Lead[]>;
-  updateLeadStatus(id: string, status: string): Promise<void>;
-  // ... other methods ...
+  getLeads(): Promise<Lead[]> | Lead[];
+  getLeadsByEmail(email: string): Promise<Lead[]> | Lead[];
+  getClientRequests?(email: string): Promise<Lead[]> | Lead[];
+  updateLeadStatus(id: string, status: string): Promise<void> | void;
+  saveLead?(lead: Partial<Lead>): Promise<void> | void;
 }
 
 export interface InvoiceItem {

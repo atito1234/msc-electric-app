@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AIProjectEstimator } from '@/components/ui/AIProjectEstimator';
+import { ClientJourneyTracker } from '@/components/ui/ClientJourneyTracker';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -392,35 +393,18 @@ export function ClientPortal() {
                   <p className="text-zinc-500">You haven't submitted any requests yet.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {requests.map((req) => (
-                    <Card key={req.id} className="bg-zinc-900 border-zinc-800">
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-white text-lg">{req.serviceType || 'General Inquiry'}</CardTitle>
-                            <CardDescription className="text-zinc-400 mt-1 flex items-center gap-4">
-                              <span>Submitted: {new Date(req.createdAt).toLocaleDateString()}</span>
-                              {req.preferredTime && <span>Prefers: {req.preferredTime}</span>}
-                            </CardDescription>
-                          </div>
-                          <Badge className={
-                            req.status === 'new' ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' :
-                              req.status === 'contacted' ? 'bg-amber-500/20 text-amber-400 border-amber-500/50' :
-                                req.status === 'scheduled' ? 'bg-green-500/20 text-green-400 border-green-500/50' :
-                                  'bg-zinc-500/20 text-zinc-400 border-zinc-500/50'
-                          }>
-                            {req.status}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="bg-black/20 p-4 rounded-lg border border-white/5">
-                          <p className="text-zinc-300 text-sm whitespace-pre-wrap">{req.description}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="grid grid-cols-1 gap-6">
+                  {requests.map((req) => {
+                    // Try to find a related project (currently very loose coupling, so we just check if there's any active project for now)
+                    const relatedProject = projects.find(p => p.status !== 'completed' && p.status !== 'cancelled') || projects[0];
+                    return (
+                      <ClientJourneyTracker
+                        key={req.id}
+                        lead={req}
+                        project={relatedProject}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </div>

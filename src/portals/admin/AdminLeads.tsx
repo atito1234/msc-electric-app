@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Mail, Phone, MapPin, Clock, FileText, CheckCircle, ArrowRight, User as UserIcon } from 'lucide-react';
+import { Search, Mail, Phone, MapPin, Clock, FileText, CheckCircle, ArrowRight, User as UserIcon, FileSignature, MessageSquare, CheckCircle2, Package, Play } from 'lucide-react';
 import { db } from '@/lib/supabase-database';
 import type { Lead, LeadStatus } from '@/lib/database';
 import { toast } from 'sonner';
@@ -14,7 +14,13 @@ import {
 const statusConfig: Record<LeadStatus, { label: string; color: string; icon: React.ElementType }> = {
     new: { label: 'New', color: 'bg-blue-500/20 text-blue-400', icon: Clock },
     contacted: { label: 'Contacted', color: 'bg-[#F2C94C]/20 text-[#F2C94C]', icon: Phone },
-    scheduled: { label: 'Scheduled', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
+    communicated: { label: 'Communicated', color: 'bg-[#F2C94C]/20 text-[#F2C94C]', icon: MessageSquare },
+    quote_prepared: { label: 'Quote Prepared', color: 'bg-purple-500/20 text-purple-400', icon: FileSignature },
+    quote_accepted: { label: 'Quote Accepted', color: 'bg-green-500/20 text-green-400', icon: CheckCircle2 },
+    contract_prepared: { label: 'Contract Prepared', color: 'bg-purple-500/20 text-purple-400', icon: FileSignature },
+    contract_accepted: { label: 'Contract Accepted', color: 'bg-green-500/20 text-green-400', icon: CheckCircle2 },
+    contracted: { label: 'Contracted', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
+    scheduled: { label: 'Scheduled', color: 'bg-emerald-500/20 text-emerald-400', icon: CheckCircle },
     archived: { label: 'Archived', color: 'bg-gray-500/20 text-gray-400', icon: FileText },
 };
 

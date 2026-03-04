@@ -203,7 +203,7 @@ export interface Expense {
 
 export type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'cancelled';
 
-export type LeadStatus = 'new' | 'contacted' | 'scheduled' | 'archived';
+export type LeadStatus = 'new' | 'contacted' | 'communicated' | 'quote_prepared' | 'quote_accepted' | 'contract_prepared' | 'contract_accepted' | 'contracted' | 'scheduled' | 'archived';
 
 export interface Lead {
   id: string;

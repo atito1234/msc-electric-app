@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  MoreVertical, 
-  Calendar, 
-  DollarSign, 
+import {
+  Plus,
+  Search,
+  MoreVertical,
+  Calendar,
+  DollarSign,
   Users,
   CheckCircle,
   Clock,
@@ -53,7 +53,7 @@ export function AdminProjects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [aiEstimate, setAiEstimate] = useState<any>(null);
-  
+
   // New project form state
   const [newProject, setNewProject] = useState<Partial<Project>>({
     name: '',
@@ -82,14 +82,14 @@ export function AdminProjects() {
   const loadData = () => {
     const allProjects = db.getProjects();
     setProjects(allProjects);
-    
+
     const allUsers = db.getUsers();
     setClients(allUsers.filter(u => u.role === 'client'));
   };
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         project.clientId.toLowerCase().includes(searchQuery.toLowerCase());
+      project.clientId.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -104,7 +104,7 @@ export function AdminProjects() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
+
     db.saveProject(project);
     setProjects([...projects, project]);
     setIsAddDialogOpen(false);
@@ -141,13 +141,13 @@ export function AdminProjects() {
       toast.error('Please enter project name and description');
       return;
     }
-    
+
     const estimate = estimateCostWithAI(
       newProject.description,
       'Residential',
       2500
     );
-    
+
     setAiEstimate(estimate);
     setNewProject({
       ...newProject,
@@ -169,7 +169,7 @@ export function AdminProjects() {
           <h2 className="font-display font-bold text-2xl text-[#F6F7F9]">Projects</h2>
           <p className="text-[#A9AFB8]">Manage all electrical projects and track progress</p>
         </div>
-        
+
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <button className="btn-primary flex items-center gap-2">
@@ -192,7 +192,7 @@ export function AdminProjects() {
                   placeholder="Enter project name"
                 />
               </div>
-              
+
               <div>
                 <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Client</label>
                 <select
@@ -206,7 +206,7 @@ export function AdminProjects() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Description</label>
                 <textarea
@@ -217,7 +217,7 @@ export function AdminProjects() {
                   placeholder="Describe the project scope..."
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Status</label>
@@ -245,7 +245,7 @@ export function AdminProjects() {
                   </select>
                 </div>
               </div>
-              
+
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="block font-mono text-xs text-[#A9AFB8]">Estimated Value</label>
@@ -271,7 +271,7 @@ export function AdminProjects() {
                   </div>
                 )}
               </div>
-              
+
               <button
                 onClick={handleAddProject}
                 className="w-full btn-primary py-3 mt-4"
@@ -326,7 +326,7 @@ export function AdminProjects() {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-[#111318] border-white/10">
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer"
                       onClick={() => { setSelectedProject(project); setIsViewDialogOpen(true); }}
                     >
@@ -335,7 +335,7 @@ export function AdminProjects() {
                     <DropdownMenuItem className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer">
                       <Edit className="w-4 h-4 mr-2" /> Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       className="text-red-400 focus:bg-red-500/10 cursor-pointer"
                       onClick={() => handleDeleteProject(project.id)}
                     >
@@ -356,7 +356,7 @@ export function AdminProjects() {
                   <span className="text-[#F6F7F9]">{project.progress}%</span>
                 </div>
                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-[#F2C94C] rounded-full transition-all"
                     style={{ width: `${project.progress}%` }}
                   />
@@ -392,19 +392,42 @@ export function AdminProjects() {
                 <DialogTitle className="text-[#F6F7F9] font-display">{selectedProject.name}</DialogTitle>
               </DialogHeader>
               <div className="space-y-6 mt-4">
-                {/* Status & Priority */}
-                <div className="flex gap-3">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig[selectedProject.status].color}`}>
-                    {statusConfig[selectedProject.status].label}
-                  </span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    selectedProject.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                    selectedProject.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                    selectedProject.priority === 'medium' ? 'bg-blue-500/20 text-blue-400' :
-                    'bg-gray-500/20 text-gray-400'
-                  }`}>
-                    {selectedProject.priority.charAt(0).toUpperCase() + selectedProject.priority.slice(1)} Priority
-                  </span>
+                {/* Status & Priority & Progress */}
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-3">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig[selectedProject.status].color}`}>
+                      {statusConfig[selectedProject.status].label}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedProject.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
+                      selectedProject.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                        selectedProject.priority === 'medium' ? 'bg-blue-500/20 text-blue-400' :
+                          'bg-gray-500/20 text-gray-400'
+                      }`}>
+                      {selectedProject.priority.charAt(0).toUpperCase() + selectedProject.priority.slice(1)} Priority
+                    </span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-[#A9AFB8] text-xs font-mono uppercase tracking-wider mb-2">Update Progress Timeline</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {[0, 30, 50, 70, 90, 100].map(pct => (
+                        <button
+                          key={pct}
+                          onClick={() => {
+                            db.saveProject({ ...selectedProject, progress: pct });
+                            setSelectedProject({ ...selectedProject, progress: pct });
+                            toast.success(`Project progress updated to ${pct}%`);
+                          }}
+                          className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${selectedProject.progress === pct
+                            ? 'bg-[#F2C94C] text-black shadow-[0_0_10px_rgba(242,201,76,0.3)]'
+                            : 'bg-white/5 text-[#A9AFB8] hover:bg-white/10 hover:text-white border border-white/10'
+                            }`}
+                        >
+                          {pct}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Description */}
@@ -454,11 +477,10 @@ export function AdminProjects() {
                             <p className="text-[#F6F7F9] text-sm">{wo.title}</p>
                             <p className="text-[#6A6D75] text-xs">{wo.estimatedHours}h estimated</p>
                           </div>
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            wo.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                          <span className={`px-2 py-1 rounded text-xs ${wo.status === 'completed' ? 'bg-green-500/20 text-green-400' :
                             wo.status === 'in-progress' ? 'bg-blue-500/20 text-blue-400' :
-                            'bg-gray-500/20 text-gray-400'
-                          }`}>
+                              'bg-gray-500/20 text-gray-400'
+                            }`}>
                             {wo.status}
                           </span>
                         </div>
@@ -484,11 +506,10 @@ export function AdminProjects() {
                             </div>
                             <div className="text-right">
                               <p className="text-[#F6F7F9] text-sm">${inv.total.toLocaleString()}</p>
-                              <span className={`text-xs ${
-                                inv.status === 'paid' ? 'text-green-400' :
+                              <span className={`text-xs ${inv.status === 'paid' ? 'text-green-400' :
                                 inv.status === 'overdue' ? 'text-red-400' :
-                                'text-blue-400'
-                              }`}>{inv.status}</span>
+                                  'text-blue-400'
+                                }`}>{inv.status}</span>
                             </div>
                           </div>
                         ) : null;

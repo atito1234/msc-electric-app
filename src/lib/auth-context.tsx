@@ -78,9 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
 
-    // DEMO Bypass: Avoids Supabase free-tier rate limits for UI testing
+    // DEMO Bypass (Leftover for clients/employees for UI testing)
     const demoUsers: Record<string, { role: UserRole, name: string, pass: string }> = {
-      'admin@mscelectric.io': { role: 'admin', name: 'Admin User', pass: 'admin123' },
       'johnson.family@email.com': { role: 'client', name: 'Michael Johnson', pass: 'client123' },
       'carlos.martinez@mscelectric.com': { role: 'employee', name: 'Carlos Martinez', pass: 'employee123' },
       'juan.rodriguez@jrelectric.com': { role: 'subcontractor', name: 'Juan Rodriguez', pass: 'sub123456' },

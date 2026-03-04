@@ -86,8 +86,10 @@ serve(async (req) => {
         // 3. Send Email to Admin via Resend
         // The user must set RESEND_API_KEY in their Supabase Secrets
         const resendApiKey = Deno.env.get('RESEND_API_KEY')
+        const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'antonio.j.tito@gmail.com'
+
         if (resendApiKey) {
-            console.log(`Dispatching Admin Notification Email...`)
+            console.log(`Dispatching Admin Notification Email to ${adminEmail}...`)
             const emailRes = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
                 headers: {
@@ -96,7 +98,7 @@ serve(async (req) => {
                 },
                 body: JSON.stringify({
                     from: 'MSC Electric <onboarding@resend.dev>', // Replace with verified domain in production
-                    to: ['admin@mscelectric.io'],
+                    to: [adminEmail],
                     subject: `New Lead Request: ${name} - ${serviceType || 'General'}`,
                     html: `
                         <h2>New Project Request or AI Chat Log</h2>

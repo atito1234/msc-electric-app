@@ -70,6 +70,9 @@ const mapContractFromDB = (c: any): Contract => ({
 });
 
 export const db: Database = {
+    // Initialization
+    init: () => { },
+
     // Users
     getUsers: async (): Promise<User[]> => {
         const { data, error } = await supabase.from('profiles').select('*');
@@ -382,6 +385,9 @@ export const db: Database = {
             createdAt: l.created_at,
             updatedAt: l.updated_at
         }));
+    },
+    getLeadsByEmail: async (email: string): Promise<Lead[]> => {
+        return db.getClientRequests(email);
     },
 
     getLeads: async (): Promise<Lead[]> => {

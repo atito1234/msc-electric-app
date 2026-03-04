@@ -360,6 +360,30 @@ export const db = {
         }
     },
 
+    getClientRequests: async (email: string): Promise<Lead[]> => {
+        const { data, error } = await supabase
+            .from('leads')
+            .select('*')
+            .eq('email', email)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data.map(l => ({
+            id: l.id,
+            name: l.name,
+            email: l.email,
+            phone: l.phone,
+            address: l.address,
+            serviceType: l.service_type,
+            complexity: l.complexity,
+            description: l.description,
+            preferredTime: l.preferred_time,
+            status: l.status,
+            createdAt: l.created_at,
+            updatedAt: l.updated_at
+        }));
+    },
+
     getLeads: async (): Promise<Lead[]> => {
         const { data, error } = await supabase
             .from('leads')

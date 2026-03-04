@@ -70,10 +70,46 @@ serve(async (req) => {
                         id: authData.user.id,
                         email: email,
                         name: name,
-                        role: 'client',
-                        is_active: true
+                        role: 'client'
                     })
                     portalStatus = `Account Created (Temp Pass: ${tempPassword})`
+
+                    // Send Welcome Email to Visitor
+                    const resendApiKey = Deno.env.get('RESEND_API_KEY')
+                    if (resendApiKey) {
+                        console.log(`Dispatching Welcome Email to ${email}...`)
+                        const visitorEmailRes = await fetch('https://api.resend.com/emails', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${resendApiKey}`
+                            },
+                            body: JSON.stringify({
+                                from: 'MSC Electric <onboarding@resend.dev>',
+                                to: [email],
+                                subject: 'Welcome to your MSC Electric Client Portal',
+                                html: `
+                                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                                        <h2>Welcome to MSC Electric</h2>
+                                        <p>Hi ${name || 'there'},</p>
+                                        <p>Thank you for submitting your project request. We have automatically created a secure Client Portal account for you to track your project's progress, invoices, and communications.</p>
+                                        <div style="background-color: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                            <p style="margin: 0 0 10px 0;"><strong>Login URL:</strong> <a href="https://mscelectric.io">https://mscelectric.io</a></p>
+                                            <p style="margin: 0 0 10px 0;"><strong>Email:</strong> ${email}</p>
+                                            <p style="margin: 0;"><strong>Temporary Password:</strong> ${tempPassword}</p>
+                                        </div>
+                                        <p><em>Please log in and change your password as soon as possible.</em></p>
+                                        <p>We will be in touch shortly regarding your project!</p>
+                                        <br/>
+                                        <p>Best regards,<br/><strong>The MSC Electric Team</strong></p>
+                                    </div>
+                                `
+                            })
+                        })
+                        if (!visitorEmailRes.ok) {
+                            console.error("Resend API failed for welcome email:", await visitorEmailRes.text())
+                        }
+                    }
                 } else {
                     console.error("Auth creation failed:", authError)
                     portalStatus = "Failed to Create Account"

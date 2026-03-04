@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import type { Project, Invoice, Contract } from '@/lib/database';
+import type { Project, Invoice, Contract, Lead } from '@/lib/database';
 import { db } from '@/lib/supabase-database';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ import {
 
 export function ClientPortal() {
   const { user, logout } = useAuth();
+  console.log("ClientPortal Render: user =", user);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -63,7 +64,13 @@ export function ClientPortal() {
     enabled: !!user,
   });
 
-  const isLoading = isLoadingProjects || isLoadingInvoices || isLoadingContracts;
+  const { data: requests = [], isLoading: isLoadingRequests } = useQuery<Lead[]>({
+    queryKey: ['requests', user?.email],
+    queryFn: () => user ? db.getClientRequests(user.email) : Promise.resolve([]),
+    enabled: !!user,
+  });
+
+  const isLoading = isLoadingProjects || isLoadingInvoices || isLoadingContracts || isLoadingRequests;
 
   if (isLoading) {
     return (
@@ -101,6 +108,7 @@ export function ClientPortal() {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'projects', label: 'My Projects', icon: FolderKanban },
+    { id: 'requests', label: 'My Requests', icon: ClipboardList },
     { id: 'invoices', label: 'Invoices', icon: Receipt },
     { id: 'contracts', label: 'Contracts', icon: FileText },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
@@ -143,10 +151,10 @@ export function ClientPortal() {
         <div className="p-4 border-t border-zinc-800">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-black font-bold">
-              {user?.name.split(' ').map(n => n[0]).join('')}
+              {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'M'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{user?.name}</p>
+              <p className="text-white text-sm font-medium truncate">{user?.name || 'Client'}</p>
               <p className="text-zinc-500 text-xs truncate">{user?.email}</p>
             </div>
           </div>
@@ -174,7 +182,7 @@ export function ClientPortal() {
                 <MessageSquare className="w-5 h-5" />
               </Button>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-black font-bold text-sm">
-                {user?.name.split(' ').map(n => n[0]).join('')}
+                {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'M'}
               </div>
             </div>
           </div>
@@ -189,7 +197,7 @@ export function ClientPortal() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-2">
-                    Welcome back, {user?.name.split(' ')[0]}!
+                    Welcome back, {user?.name ? user.name.split(' ')[0] : 'Client'}!
                   </h1>
                   <p className="text-zinc-400">
                     Here's what's happening with your projects.
@@ -355,6 +363,66 @@ export function ClientPortal() {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          )}
+
+          {/* Requests Tab */}
+          {activeTab === 'requests' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">My Requests</h3>
+                  <p className="text-zinc-400">Track your submitted project requests and AI chat inquiries.</p>
+                </div>
+                <Button
+                  onClick={() => window.location.href = `mailto:admin@mscelectric.io?subject=Schedule%20Consultation`}
+                  className="bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Schedule Call
+                </Button>
+              </div>
+
+              {requests.length === 0 ? (
+                <div className="text-center py-12 bg-zinc-900 border border-zinc-800 rounded-xl">
+                  <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+                    <ClipboardList className="w-8 h-8 text-zinc-500" />
+                  </div>
+                  <h4 className="text-white font-medium mb-2">No Requests Found</h4>
+                  <p className="text-zinc-500">You haven't submitted any requests yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {requests.map((req) => (
+                    <Card key={req.id} className="bg-zinc-900 border-zinc-800">
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-white text-lg">{req.serviceType || 'General Inquiry'}</CardTitle>
+                            <CardDescription className="text-zinc-400 mt-1 flex items-center gap-4">
+                              <span>Submitted: {new Date(req.createdAt).toLocaleDateString()}</span>
+                              {req.preferredTime && <span>Prefers: {req.preferredTime}</span>}
+                            </CardDescription>
+                          </div>
+                          <Badge className={
+                            req.status === 'new' ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' :
+                              req.status === 'contacted' ? 'bg-amber-500/20 text-amber-400 border-amber-500/50' :
+                                req.status === 'scheduled' ? 'bg-green-500/20 text-green-400 border-green-500/50' :
+                                  'bg-zinc-500/20 text-zinc-400 border-zinc-500/50'
+                          }>
+                            {req.status}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="bg-black/20 p-4 rounded-lg border border-white/5">
+                          <p className="text-zinc-300 text-sm whitespace-pre-wrap">{req.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

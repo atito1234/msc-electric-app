@@ -1,7 +1,7 @@
 import { useRef, useLayoutEffect, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Loader2, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { db } from '@/lib/supabase-database';
 
@@ -275,23 +275,33 @@ export function ContactSection() {
                 </label>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full btn-primary flex items-center justify-center gap-2 py-4 disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    Submit Request & Register
-                    <Send className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  type="button"
+                  onClick={() => window.location.href = `mailto:admin@mscelectric.io?subject=Schedule%20Consultation`}
+                  className="w-full sm:w-1/2 glass-card flex items-center justify-center gap-2 py-4 hover:border-[#F2C94C]/50 transition-colors text-[#F6F7F9] font-medium rounded-lg border border-white/10 bg-white/5"
+                >
+                  <Calendar className="w-4 h-4 text-[#F2C94C]" />
+                  Schedule Call
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-1/2 btn-primary flex items-center justify-center gap-2 py-4 disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Submit Request
+                      <Send className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>

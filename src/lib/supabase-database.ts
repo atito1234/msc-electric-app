@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Project, Invoice, User, WorkOrder, Contract, DashboardAnalytics, Lead } from './database';
+import type { Database, Project, Invoice, User, WorkOrder, Contract, DashboardAnalytics, Lead } from './database';
 
 // Helper to map snake_case DB to camelCase Frontend
 const mapProjectFromDB = (p: any): Project => ({
@@ -69,7 +69,7 @@ const mapContractFromDB = (c: any): Contract => ({
     updatedAt: c.updated_at,
 });
 
-export const db = {
+export const db: Database = {
     // Users
     getUsers: async (): Promise<User[]> => {
         const { data, error } = await supabase.from('profiles').select('*');

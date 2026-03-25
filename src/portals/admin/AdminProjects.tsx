@@ -59,6 +59,9 @@ export function AdminProjects() {
   const [newClientName, setNewClientName] = useState('');
   const [newClientEmail, setNewClientEmail] = useState('');
 
+  // Project Components State
+  const [projectComponents, setProjectComponents] = useState<{ name: string, price: number }[]>([]);
+
   // New project form state
   const [newProject, setNewProject] = useState<Partial<Project>>({
     name: '',
@@ -101,9 +104,16 @@ export function AdminProjects() {
 
   const handleAddProject = () => {
     const { id: _, ...projectData } = newProject as Project;
+
+    let finalDescription = projectData.description || '';
+    if (projectComponents.length > 0) {
+      finalDescription += '\n\nProject Components:\n' + projectComponents.map(c => `- ${c.name}: $${c.price}`).join('\n');
+    }
+
     const project: Project = {
       id: `proj-${Date.now()}`,
       ...projectData,
+      description: finalDescription,
       address: { street: '', city: '', state: '', zip: '' },
       actualValue: 0,
       createdAt: new Date().toISOString(),
@@ -113,6 +123,7 @@ export function AdminProjects() {
     db.saveProject(project);
     setProjects([...projects, project]);
     setIsAddDialogOpen(false);
+    setProjectComponents([]);
     setNewProject({
       name: '',
       description: '',
@@ -162,14 +173,14 @@ export function AdminProjects() {
   };
 
   const handleCreateClient = () => {
-    if (!newClientName || !newClientEmail) {
-      toast.error('Please enter client name and email');
+    if (!newClientName) {
+      toast.error('Please enter client name');
       return;
     }
     const newClient: User = {
       id: `client-${Date.now()}`,
       name: newClientName,
-      email: newClientEmail,
+      email: newClientEmail || `no-email-${Date.now()}@example.com`,
       role: 'client',
       password: 'client123',
       createdAt: new Date().toISOString(),
@@ -259,9 +270,9 @@ export function AdminProjects() {
                   <select
                     value={newProject.clientId}
                     onChange={(e) => setNewProject({ ...newProject, clientId: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] [&>option]:bg-[#111318] focus:outline-none focus:border-[#F2C94C]"
                   >
-                    <option value="">Select client</option>
+                    <option value="" className="text-gray-400">Select client</option>
                     {clients.map(client => (
                       <option key={client.id} value={client.id}>{client.name}</option>
                     ))}
@@ -276,8 +287,58 @@ export function AdminProjects() {
                   onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
                   rows={3}
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C] resize-none"
-                  placeholder="Describe the project scope..."
+                  placeholder="Describe the overall project scope..."
                 />
+              </div>
+
+              {/* Project Components */}
+              <div>
+                <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Project Components (Optional pricing breakdown)</label>
+                <div className="space-y-2 mb-2">
+                  {projectComponents.map((comp, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={comp.name}
+                        onChange={(e) => {
+                          const newComps = [...projectComponents];
+                          newComps[idx].name = e.target.value;
+                          setProjectComponents(newComps);
+                        }}
+                        className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                        placeholder="Component name (e.g. Panel Upgrade)"
+                      />
+                      <input
+                        type="number"
+                        value={comp.price || ''}
+                        onChange={(e) => {
+                          const newComps = [...projectComponents];
+                          newComps[idx].price = Number(e.target.value);
+                          setProjectComponents(newComps);
+                          setNewProject({ ...newProject, estimatedValue: newComps.reduce((sum, c) => sum + (c.price || 0), 0) });
+                        }}
+                        className="w-24 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                        placeholder="Price"
+                      />
+                      <button
+                        onClick={() => {
+                          const newComps = projectComponents.filter((_, i) => i !== idx);
+                          setProjectComponents(newComps);
+                          setNewProject({ ...newProject, estimatedValue: newComps.reduce((sum, c) => sum + (c.price || 0), 0) });
+                        }}
+                        className="text-red-400 p-2 hover:bg-white/5 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setProjectComponents([...projectComponents, { name: '', price: 0 }])}
+                  className="text-xs text-[#F2C94C] hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Add Component
+                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -286,7 +347,7 @@ export function AdminProjects() {
                   <select
                     value={newProject.status}
                     onChange={(e) => setNewProject({ ...newProject, status: e.target.value as ProjectStatus })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] [&>option]:bg-[#111318] focus:outline-none focus:border-[#F2C94C]"
                   >
                     {Object.entries(statusConfig).map(([status, config]) => (
                       <option key={status} value={status}>{config.label}</option>
@@ -298,7 +359,7 @@ export function AdminProjects() {
                   <select
                     value={newProject.priority}
                     onChange={(e) => setNewProject({ ...newProject, priority: e.target.value as any })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] [&>option]:bg-[#111318] focus:outline-none focus:border-[#F2C94C]"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -360,7 +421,7 @@ export function AdminProjects() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'all')}
-          className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+          className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-[#F6F7F9] [&>option]:bg-[#111318] focus:outline-none focus:border-[#F2C94C]"
         >
           <option value="all">All Status</option>
           {Object.entries(statusConfig).map(([status, config]) => (

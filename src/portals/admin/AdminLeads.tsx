@@ -97,7 +97,7 @@ export function AdminLeads() {
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as LeadStatus | 'all')}
-                    className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                    className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-[#F6F7F9] [&>option]:bg-[#111318] focus:outline-none focus:border-[#F2C94C]"
                 >
                     <option value="all">All Status</option>
                     {Object.entries(statusConfig).map(([status, config]) => (

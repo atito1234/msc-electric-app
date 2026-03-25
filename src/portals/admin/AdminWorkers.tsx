@@ -24,7 +24,7 @@ export function AdminWorkers() {
 
   const filteredWorkers = workers.filter(worker => {
     const matchesSearch = worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         worker.email.toLowerCase().includes(searchQuery.toLowerCase());
+      worker.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'all' || worker.role === roleFilter;
     return matchesSearch && matchesRole;
   });
@@ -70,7 +70,7 @@ export function AdminWorkers() {
           <h2 className="font-display font-bold text-2xl text-[#F6F7F9]">Workers</h2>
           <p className="text-[#A9AFB8]">Manage employees and subcontractors</p>
         </div>
-        <button 
+        <button
           onClick={() => toast.info('Add Worker - Coming Soon')}
           className="btn-primary flex items-center gap-2"
         >
@@ -94,7 +94,7 @@ export function AdminWorkers() {
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value as UserRole | 'all')}
-          className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+          className="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-[#F6F7F9] [&>option]:bg-[#111318] focus:outline-none focus:border-[#F2C94C]"
         >
           <option value="all">All Roles</option>
           <option value="employee">Employees</option>
@@ -120,9 +120,8 @@ export function AdminWorkers() {
                     <p className="text-[#6A6D75] text-sm">{workerData.title || worker.role}</p>
                   </div>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  worker.role === 'employee' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' : 'bg-blue-500/20 text-blue-400'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${worker.role === 'employee' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' : 'bg-blue-500/20 text-blue-400'
+                  }`}>
                   {worker.role === 'employee' ? 'Employee' : 'Subcontractor'}
                 </span>
               </div>
@@ -149,7 +148,7 @@ export function AdminWorkers() {
                     {workerData.availability}
                   </span>
                 </div>
-                <button 
+                <button
                   onClick={() => { setSelectedWorker(worker); setIsViewOpen(true); }}
                   className="text-[#F2C94C] text-sm hover:underline"
                 >

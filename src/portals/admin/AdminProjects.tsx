@@ -26,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -198,28 +199,42 @@ export function AdminProjects() {
     }
 
     try {
-      // For production Vercel, hit our secure serverless function
-      const response = await fetch('/api/create-client', {
+      const generatedEmail = newClientEmail || `no-email-${Date.now()}@mscelectric.io`;
+
+      // Hit our deployed Supabase Edge Function that has admin powers
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-contact-request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           name: newClientName,
-          email: newClientEmail, // Will generate fallback email in backend if empty
-          role: 'client'
+          email: generatedEmail,
+          phone: '',
+          address: '',
+          serviceType: 'Ad-hoc Client',
+          complexity: 'simple',
+          description: 'Ad-hoc client explicitly created by Admin Dashboard. [REQUESTED PORTAL ACCESS]',
+          preferredTime: ''
         })
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to create client');
+        throw new Error('Failed to create client via edge function');
       }
 
-      const { user } = await response.json();
+      // The Edge function returns {success: true} but not the ID.
+      // Give the DB a moment to sync, then find the newly created user by email
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const users = await db.getUsers();
+      const newCreatedUser = users.find(u => u.email === generatedEmail);
+
+      if (newCreatedUser) {
+        setNewProject({ ...newProject, clientId: newCreatedUser.id });
+      }
 
       setProjectEmployees(prev => [...prev]); // trigger re-render if needed
-      setNewProject({ ...newProject, clientId: user.id });
       setIsAddingClient(false);
       setNewClientName('');
       setNewClientEmail('');
@@ -230,7 +245,7 @@ export function AdminProjects() {
       toast.success('Client created successfully');
     } catch (error: any) {
       console.error('Error creating client:', error);
-      toast.error('Failed to create client. Note: This requires Vercel deployment to work.');
+      toast.error('Failed to create client');
     }
   };
 
@@ -255,9 +270,10 @@ export function AdminProjects() {
               New Project
             </button>
           </DialogTrigger>
-          <DialogContent className="bg-[#111318] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="bg-[#111318] border-white/10 max-w-4xl max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] md:w-full">
             <DialogHeader>
               <DialogTitle className="text-[#F6F7F9] font-display">Create New Project</DialogTitle>
+              <DialogDescription className="sr-only">Fill out this form to create a new project.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
@@ -568,11 +584,12 @@ export function AdminProjects() {
 
       {/* View Project Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="bg-[#111318] border-white/10 max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#111318] border-white/10 max-w-3xl overflow-y-auto max-h-[90vh]">
           {selectedProject && (
             <>
-              <DialogHeader>
-                <DialogTitle className="text-[#F6F7F9] font-display">{selectedProject.name}</DialogTitle>
+              <DialogHeader className="flex flex-row justify-between items-center mr-8">
+                <DialogTitle className="text-[#F6F7F9] font-display text-xl">{selectedProject?.name}</DialogTitle>
+                <DialogDescription className="sr-only">Viewing details for project {selectedProject?.name}</DialogDescription>
               </DialogHeader>
               <div className="space-y-6 mt-4">
                 {/* Status & Priority & Progress */}

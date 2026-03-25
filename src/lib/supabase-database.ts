@@ -119,13 +119,9 @@ export const db: Database = {
 
     // Projects
     getProjects: async (): Promise<Project[]> => {
-        // Fetch projects with embedded work orders
         const { data, error } = await supabase
             .from('projects')
-            .select(`
-        *,
-        work_orders(*)
-      `)
+            .select(`*`)
             .order('updated_at', { ascending: false });
 
         if (error) {

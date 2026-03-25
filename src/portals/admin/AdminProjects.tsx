@@ -196,22 +196,42 @@ export function AdminProjects() {
       toast.error('Please enter client name');
       return;
     }
-    const newClient: User = {
-      id: `client-${Date.now()}`,
-      name: newClientName,
-      email: newClientEmail || `no-email-${Date.now()}@example.com`,
-      role: 'client',
-      password: 'client123',
-      createdAt: new Date().toISOString(),
-      isActive: true,
-    };
-    await db.saveUser(newClient);
-    setClients([...clients, newClient]);
-    setNewProject({ ...newProject, clientId: newClient.id });
-    setIsAddingClient(false);
-    setNewClientName('');
-    setNewClientEmail('');
-    toast.success('Client created successfully');
+
+    try {
+      // For production Vercel, hit our secure serverless function
+      const response = await fetch('/api/create-client', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newClientName,
+          email: newClientEmail, // Will generate fallback email in backend if empty
+          role: 'client'
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to create client');
+      }
+
+      const { user } = await response.json();
+
+      setProjectEmployees(prev => [...prev]); // trigger re-render if needed
+      setNewProject({ ...newProject, clientId: user.id });
+      setIsAddingClient(false);
+      setNewClientName('');
+      setNewClientEmail('');
+
+      // Reload the project list and clients silently
+      loadData();
+
+      toast.success('Client created successfully');
+    } catch (error: any) {
+      console.error('Error creating client:', error);
+      toast.error('Failed to create client. Note: This requires Vercel deployment to work.');
+    }
   };
 
   const getClientName = (clientId: string) => {

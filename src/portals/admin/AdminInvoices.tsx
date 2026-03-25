@@ -245,6 +245,41 @@ export function AdminInvoices() {
     }
   };
 
+  const exportToCSV = () => {
+    if (invoices.length === 0) {
+      toast.error('No invoices to export');
+      return;
+    }
+
+    const headers = ['Invoice Number', 'Client', 'Project', 'Issue Date', 'Due Date', 'Status', 'Total', 'Balance Due'];
+    const csvContent = [
+      headers.join(','),
+      ...invoices.map(inv => {
+        return [
+          inv.invoiceNumber,
+          `"${getClientName(inv.clientId)}"`,
+          `"${getProjectName(inv.projectId)}"`,
+          inv.issueDate,
+          inv.dueDate,
+          inv.status,
+          inv.total,
+          inv.balanceDue
+        ].join(',');
+      })
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `invoices_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Spreadsheet exported successfully');
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats */}
@@ -270,121 +305,127 @@ export function AdminInvoices() {
           <p className="text-[#A9AFB8]">Manage invoices and track payments</p>
         </div>
 
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <button className="btn-primary flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              AI Generate Invoice
-            </button>
-          </DialogTrigger>
-          <DialogContent className="bg-[#111318] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-[#F6F7F9] font-display">Generate AI Invoice</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div>
-                <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Project</label>
-                <select
-                  value={newInvoice.projectId}
-                  onChange={(e) => setNewInvoice({ ...newInvoice, projectId: e.target.value, clientId: projects.find(p => p.id === e.target.value)?.clientId || '' })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
-                >
-                  <option value="">Select project</option>
-                  {projects.map(project => (
-                    <option key={project.id} value={project.id}>{project.name}</option>
-                  ))}
-                </select>
-              </div>
+        <div className="flex gap-2">
+          <button onClick={exportToCSV} className="btn-secondary flex items-center gap-2 bg-white/5 hover:bg-white/10 text-[#F6F7F9] px-4 py-2 rounded-lg transition-colors">
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="btn-primary flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                AI Generate Invoice
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#111318] border-white/10 max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-[#F6F7F9] font-display">Generate AI Invoice</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div>
+                  <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Project</label>
+                  <select
+                    value={newInvoice.projectId}
+                    onChange={(e) => setNewInvoice({ ...newInvoice, projectId: e.target.value, clientId: projects.find(p => p.id === e.target.value)?.clientId || '' })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                  >
+                    <option value="">Select project</option>
+                    {projects.map(project => (
+                      <option key={project.id} value={project.id}>{project.name}</option>
+                    ))}
+                  </select>
+                </div>
 
-              {newInvoice.projectId && (
-                <button
-                  onClick={handleGenerateAIInvoice}
-                  className="w-full py-3 bg-[#F2C94C]/20 border border-[#F2C94C]/50 rounded-lg text-[#F2C94C] flex items-center justify-center gap-2 hover:bg-[#F2C94C]/30 transition-colors"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Analyze Project & Generate Invoice
-                </button>
-              )}
+                {newInvoice.projectId && (
+                  <button
+                    onClick={handleGenerateAIInvoice}
+                    className="w-full py-3 bg-[#F2C94C]/20 border border-[#F2C94C]/50 rounded-lg text-[#F2C94C] flex items-center justify-center gap-2 hover:bg-[#F2C94C]/30 transition-colors"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Analyze Project & Generate Invoice
+                  </button>
+                )}
 
-              {aiSuggestion && (
-                <div className="space-y-4">
-                  <div className="p-4 bg-[#F2C94C]/10 rounded-lg">
-                    <p className="text-[#F2C94C] text-sm font-medium mb-1">AI Suggestion</p>
-                    <p className="text-[#A9AFB8] text-xs">{aiSuggestion.reasoning}</p>
-                    <p className="text-[#6A6D75] text-xs mt-2">Confidence: {Math.round(aiSuggestion.confidence * 100)}%</p>
-                  </div>
+                {aiSuggestion && (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-[#F2C94C]/10 rounded-lg">
+                      <p className="text-[#F2C94C] text-sm font-medium mb-1">AI Suggestion</p>
+                      <p className="text-[#A9AFB8] text-xs">{aiSuggestion.reasoning}</p>
+                      <p className="text-[#6A6D75] text-xs mt-2">Confidence: {Math.round(aiSuggestion.confidence * 100)}%</p>
+                    </div>
 
-                  <div>
-                    <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Line Items (Editable)</label>
-                    <div className="space-y-3">
-                      {aiSuggestion.items.map((item: any, idx: number) => (
-                        <div key={idx} className="flex flex-col md:flex-row items-start md:items-center justify-between p-3 bg-white/5 rounded-lg gap-3">
-                          <div className="flex-1 w-full space-y-2">
-                            <input
-                              type="text"
-                              value={item.description}
-                              onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
-                              className="w-full bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
-                            />
-                            <div className="flex items-center gap-2">
+                    <div>
+                      <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Line Items (Editable)</label>
+                      <div className="space-y-3">
+                        {aiSuggestion.items.map((item: any, idx: number) => (
+                          <div key={idx} className="flex flex-col md:flex-row items-start md:items-center justify-between p-3 bg-white/5 rounded-lg gap-3">
+                            <div className="flex-1 w-full space-y-2">
                               <input
-                                type="number"
-                                value={item.quantity}
-                                onChange={(e) => handleUpdateItem(idx, 'quantity', Number(e.target.value))}
-                                className="w-20 bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-xs text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                                type="text"
+                                value={item.description}
+                                onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
+                                className="w-full bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
                               />
-                              <span className="text-[#6A6D75] text-xs">× $</span>
-                              <input
-                                type="number"
-                                value={item.unitPrice}
-                                onChange={(e) => handleUpdateItem(idx, 'unitPrice', Number(e.target.value))}
-                                className="w-24 bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-xs text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
-                              />
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) => handleUpdateItem(idx, 'quantity', Number(e.target.value))}
+                                  className="w-20 bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-xs text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                                />
+                                <span className="text-[#6A6D75] text-xs">× $</span>
+                                <input
+                                  type="number"
+                                  value={item.unitPrice}
+                                  onChange={(e) => handleUpdateItem(idx, 'unitPrice', Number(e.target.value))}
+                                  className="w-24 bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-xs text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                              <p className="text-[#F6F7F9] font-medium min-w-[4rem] text-right">${item.total.toFixed(2)}</p>
+                              <button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-300 p-1">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-                            <p className="text-[#F6F7F9] font-medium min-w-[4rem] text-right">${item.total.toFixed(2)}</p>
-                            <button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-300 p-1">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                      <button onClick={handleAddItem} className="text-xs text-[#F2C94C] hover:underline mt-2 flex items-center gap-1">
-                        + Add Line Item
-                      </button>
+                        ))}
+                        <button onClick={handleAddItem} className="text-xs text-[#F2C94C] hover:underline mt-2 flex items-center gap-1">
+                          + Add Line Item
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Subtotal</label>
-                      <p className="text-[#F6F7F9]">${aiSuggestion.subtotal.toFixed(2)}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Subtotal</label>
+                        <p className="text-[#F6F7F9]">${aiSuggestion.subtotal.toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Tax (8.25%)</label>
+                        <p className="text-[#F6F7F9]">${aiSuggestion.taxAmount.toFixed(2)}</p>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Tax (8.25%)</label>
-                      <p className="text-[#F6F7F9]">${aiSuggestion.taxAmount.toFixed(2)}</p>
-                    </div>
-                  </div>
 
-                  <div className="p-4 bg-white/5 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#F6F7F9] font-medium">Total</span>
-                      <span className="text-[#F2C94C] text-xl font-display font-bold">${aiSuggestion.total.toFixed(2)}</span>
+                    <div className="p-4 bg-white/5 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#F6F7F9] font-medium">Total</span>
+                        <span className="text-[#F2C94C] text-xl font-display font-bold">${aiSuggestion.total.toFixed(2)}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={handleCreateInvoice}
-                    className="w-full btn-primary py-3"
-                  >
-                    Create Invoice
-                  </button>
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+                    <button
+                      onClick={handleCreateInvoice}
+                      className="w-full btn-primary py-3"
+                    >
+                      Create Invoice
+                    </button>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Filters */}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 // Map icons removed - using CSS markers instead
 import type { Project } from '@/lib/database';
-import { db } from '@/lib/database';
+import { db } from '@/lib/supabase-database';
 
 export function AdminMap() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -9,7 +9,10 @@ export function AdminMap() {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
   useEffect(() => {
-    setProjects(db.getProjects());
+    const fetchProjects = async () => {
+      setProjects(await db.getProjects());
+    };
+    fetchProjects();
   }, []);
 
   const filteredProjects = projects.filter(p => {
@@ -39,19 +42,19 @@ export function AdminMap() {
           <p className="text-[#A9AFB8]">Visualize all projects and their locations</p>
         </div>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${filter === 'all' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' : 'bg-white/5 text-[#A9AFB8]'}`}
           >
             All
           </button>
-          <button 
+          <button
             onClick={() => setFilter('active')}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${filter === 'active' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' : 'bg-white/5 text-[#A9AFB8]'}`}
           >
             Active
           </button>
-          <button 
+          <button
             onClick={() => setFilter('completed')}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${filter === 'completed' ? 'bg-[#F2C94C]/20 text-[#F2C94C]' : 'bg-white/5 text-[#A9AFB8]'}`}
           >
@@ -87,7 +90,7 @@ export function AdminMap() {
             const hash = project.id.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
             const x = 15 + (hash % 70);
             const y = 15 + ((hash * 7) % 70);
-            
+
             return (
               <button
                 key={project.id}
@@ -96,11 +99,11 @@ export function AdminMap() {
                 style={{ left: `${x}%`, top: `${y}%` }}
               >
                 <div className="relative">
-                  <div 
+                  <div
                     className="w-4 h-4 rounded-full border-2 border-white shadow-lg transition-transform group-hover:scale-125"
                     style={{ backgroundColor: getStatusColor(project.status) }}
                   />
-                  <div 
+                  <div
                     className="absolute inset-0 w-4 h-4 rounded-full animate-ping opacity-50"
                     style={{ backgroundColor: getStatusColor(project.status) }}
                   />
@@ -144,7 +147,7 @@ export function AdminMap() {
             <div className="absolute top-4 right-4 w-80 glass-card rounded-xl p-4">
               <div className="flex items-start justify-between mb-3">
                 <h3 className="font-display font-semibold text-[#F6F7F9]">{selectedProject.name}</h3>
-                <button 
+                <button
                   onClick={() => setSelectedProject(null)}
                   className="text-[#6A6D75] hover:text-[#F6F7F9]"
                 >
@@ -167,7 +170,7 @@ export function AdminMap() {
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-white/10">
-                <button 
+                <button
                   onClick={() => window.location.href = `/admin/projects`}
                   className="w-full py-2 bg-[#F2C94C]/20 rounded-lg text-sm text-[#F2C94C] hover:bg-[#F2C94C]/30 transition-colors"
                 >

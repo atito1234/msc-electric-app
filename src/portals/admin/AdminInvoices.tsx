@@ -14,7 +14,7 @@ import {
   Trash2
 } from 'lucide-react';
 import type { Invoice, InvoiceStatus, Project } from '@/lib/database';
-import { db } from '@/lib/database';
+import { db } from '@/lib/supabase-database';
 import { generateInvoiceWithAI } from '@/lib/ai-service';
 import { toast } from 'sonner';
 import {
@@ -52,6 +52,7 @@ const statusConfig: Record<InvoiceStatus, { label: string; color: string; icon: 
 export function AdminInvoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -79,9 +80,10 @@ export function AdminInvoices() {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setInvoices(db.getInvoices());
-    setProjects(db.getProjects());
+  const loadData = async () => {
+    setInvoices(await db.getInvoices());
+    setProjects(await db.getProjects());
+    setClients(await db.getUsers());
   };
 
   const filteredInvoices = invoices.filter(invoice => {
@@ -169,7 +171,7 @@ export function AdminInvoices() {
     handleUpdateTotals(newItems);
   };
 
-  const handleCreateInvoice = () => {
+  const handleCreateInvoice = async () => {
     const { id: _, ...invoiceData } = newInvoice as Invoice;
     const invoice: Invoice = {
       id: `inv-${Date.now()}`,
@@ -183,20 +185,20 @@ export function AdminInvoices() {
       updatedAt: new Date().toISOString(),
     };
 
-    db.saveInvoice(invoice);
+    await db.saveInvoice(invoice);
     setInvoices([...invoices, invoice]);
     setIsAddDialogOpen(false);
     toast.success('Invoice created successfully');
   };
 
-  const handleSendInvoice = (invoice: Invoice) => {
+  const handleSendInvoice = async (invoice: Invoice) => {
     const updated = { ...invoice, status: 'sent' as InvoiceStatus, sentAt: new Date().toISOString() };
-    db.saveInvoice(updated);
+    await db.saveInvoice(updated);
     setInvoices(invoices.map(i => i.id === invoice.id ? updated : i));
     toast.success('Invoice sent to client');
   };
 
-  const handleMarkPaid = (invoice: Invoice) => {
+  const handleMarkPaid = async (invoice: Invoice) => {
     const updated = {
       ...invoice,
       status: 'paid' as InvoiceStatus,
@@ -204,13 +206,13 @@ export function AdminInvoices() {
       amountPaid: invoice.total,
       balanceDue: 0,
     };
-    db.saveInvoice(updated);
+    await db.saveInvoice(updated);
     setInvoices(invoices.map(i => i.id === invoice.id ? updated : i));
     toast.success('Invoice marked as paid');
   };
 
   const getClientName = (clientId: string) => {
-    const client = db.getUserById(clientId);
+    const client = clients.find(c => c.id === clientId);
     return client?.name || clientId;
   };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Send, CheckCircle, Eye, Download, PenTool } from 'lucide-react';
 import type { Contract, ContractStatus } from '@/lib/database';
-import { db } from '@/lib/database';
+import { db } from '@/lib/supabase-database';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -21,15 +21,20 @@ const statusConfig: Record<ContractStatus, { label: string; color: string }> = {
 
 export function AdminContracts() {
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
 
   useEffect(() => {
-    setContracts(db.getContracts());
+    const loadData = async () => {
+      setContracts(await db.getContracts());
+      setClients(await db.getUsers());
+    };
+    loadData();
   }, []);
 
-  const filteredContracts = contracts.filter(c => 
+  const filteredContracts = contracts.filter(c =>
     c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.contractNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -38,29 +43,29 @@ export function AdminContracts() {
   const activeCount = contracts.filter(c => c.status === 'active').length;
   const pendingSignatures = contracts.filter(c => c.status === 'sent').length;
 
-  const handleSend = (contract: Contract) => {
+  const handleSend = async (contract: Contract) => {
     const updated = { ...contract, status: 'sent' as ContractStatus };
-    db.saveContract(updated);
+    await db.saveContract(updated);
     setContracts(contracts.map(c => c.id === contract.id ? updated : c));
     toast.success('Contract sent for signature');
   };
 
-  const handleSign = (contract: Contract) => {
-    const updated = { 
-      ...contract, 
+  const handleSign = async (contract: Contract) => {
+    const updated = {
+      ...contract,
       status: 'active' as ContractStatus,
       companySigned: true,
       companySignedAt: new Date().toISOString(),
       clientSigned: true,
       clientSignedAt: new Date().toISOString(),
     };
-    db.saveContract(updated);
+    await db.saveContract(updated);
     setContracts(contracts.map(c => c.id === contract.id ? updated : c));
     toast.success('Contract signed and activated');
   };
 
   const getClientName = (clientId: string) => {
-    const client = db.getUserById(clientId);
+    const client = clients.find(c => c.id === clientId);
     return client?.name || clientId;
   };
 
@@ -88,7 +93,7 @@ export function AdminContracts() {
           <h2 className="font-display font-bold text-2xl text-[#F6F7F9]">Contracts</h2>
           <p className="text-[#A9AFB8]">Manage service agreements and contracts</p>
         </div>
-        <button 
+        <button
           onClick={() => toast.info('Create Contract - Coming Soon')}
           className="btn-primary flex items-center gap-2"
         >
@@ -144,14 +149,14 @@ export function AdminContracts() {
             </div>
 
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => { setSelectedContract(contract); setIsViewOpen(true); }}
                 className="flex-1 py-2 bg-white/5 rounded-lg text-sm text-[#F6F7F9] hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
               >
                 <Eye className="w-4 h-4" /> View
               </button>
               {contract.status === 'draft' && (
-                <button 
+                <button
                   onClick={() => handleSend(contract)}
                   className="flex-1 py-2 bg-blue-500/20 rounded-lg text-sm text-blue-400 hover:bg-blue-500/30 transition-colors flex items-center justify-center gap-2"
                 >
@@ -159,7 +164,7 @@ export function AdminContracts() {
                 </button>
               )}
               {contract.status === 'sent' && (
-                <button 
+                <button
                   onClick={() => handleSign(contract)}
                   className="flex-1 py-2 bg-green-500/20 rounded-lg text-sm text-green-400 hover:bg-green-500/30 transition-colors flex items-center justify-center gap-2"
                 >

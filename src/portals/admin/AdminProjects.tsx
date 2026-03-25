@@ -16,8 +16,8 @@ import {
   Eye,
   Sparkles
 } from 'lucide-react';
-import type { Project, ProjectStatus, User } from '@/lib/database';
-import { db } from '@/lib/database';
+import type { Project, ProjectStatus, User, Invoice } from '@/lib/database';
+import { db } from '@/lib/supabase-database';
 import { estimateCostWithAI } from '@/lib/ai-service';
 import { toast } from 'sonner';
 import {
@@ -54,6 +54,10 @@ export function AdminProjects() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [aiEstimate, setAiEstimate] = useState<any>(null);
 
+  // Async relational data state for the View Dialog
+  const [projectEmployees, setProjectEmployees] = useState<User[]>([]);
+  const [projectInvoices, setProjectInvoices] = useState<Invoice[]>([]);
+
   // Quick Client Creation State
   const [isAddingClient, setIsAddingClient] = useState(false);
   const [newClientName, setNewClientName] = useState('');
@@ -89,12 +93,23 @@ export function AdminProjects() {
     loadData();
   }, []);
 
-  const loadData = () => {
-    const allProjects = db.getProjects();
+  useEffect(() => {
+    if (selectedProject && isViewDialogOpen) {
+      // Load assigned employees
+      Promise.all(selectedProject.assignedElectricians.map(id => db.getUserById(id)))
+        .then(users => setProjectEmployees(users.filter(Boolean) as User[]));
+      // Load invoices
+      Promise.all(selectedProject.invoices.map(id => db.getInvoiceById(id)))
+        .then(invs => setProjectInvoices(invs.filter(Boolean) as Invoice[]));
+    }
+  }, [selectedProject, isViewDialogOpen]);
+
+  const loadData = async () => {
+    const allProjects = await db.getProjects();
     setProjects(allProjects);
 
-    const allUsers = db.getUsers();
-    setClients(allUsers.filter(u => u.role === 'client'));
+    const allUsers = await db.getUsers();
+    setClients(allUsers.filter((u: User) => u.role === 'client'));
   };
 
   const filteredProjects = projects.filter(project => {
@@ -104,7 +119,7 @@ export function AdminProjects() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleAddProject = () => {
+  const handleAddProject = async () => {
     const { id: _, ...projectData } = newProject as Project;
 
     let finalDescription = projectData.description || '';
@@ -122,7 +137,7 @@ export function AdminProjects() {
       updatedAt: new Date().toISOString(),
     };
 
-    db.saveProject(project);
+    await db.saveProject(project);
     setProjects([...projects, project]);
     setIsAddDialogOpen(false);
     setProjectComponents([]);
@@ -150,8 +165,8 @@ export function AdminProjects() {
     toast.success('Project created successfully');
   };
 
-  const handleDeleteProject = (id: string) => {
-    db.deleteProject(id);
+  const handleDeleteProject = async (id: string) => {
+    await db.deleteProject(id);
     setProjects(projects.filter(p => p.id !== id));
     toast.success('Project deleted');
   };
@@ -176,7 +191,7 @@ export function AdminProjects() {
     toast.success('AI estimate generated');
   };
 
-  const handleCreateClient = () => {
+  const handleCreateClient = async () => {
     if (!newClientName) {
       toast.error('Please enter client name');
       return;
@@ -190,7 +205,7 @@ export function AdminProjects() {
       createdAt: new Date().toISOString(),
       isActive: true,
     };
-    db.saveUser(newClient);
+    await db.saveUser(newClient);
     setClients([...clients, newClient]);
     setNewProject({ ...newProject, clientId: newClient.id });
     setIsAddingClient(false);
@@ -561,9 +576,13 @@ export function AdminProjects() {
                       {[0, 30, 50, 70, 90, 100].map(pct => (
                         <button
                           key={pct}
-                          onClick={() => {
-                            db.saveProject({ ...selectedProject, progress: pct });
+                          onClick={async () => {
+                            await db.saveProject({ ...selectedProject, progress: pct });
                             setSelectedProject({ ...selectedProject, progress: pct });
+
+                            // Also update the project in the main list so UI reflects the change on close
+                            setProjects(projects.map(p => p.id === selectedProject.id ? { ...p, progress: pct } : p));
+
                             toast.success(`Project progress updated to ${pct}%`);
                           }}
                           className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${selectedProject.progress === pct
@@ -600,17 +619,14 @@ export function AdminProjects() {
                 <div>
                   <h4 className="text-[#A9AFB8] text-xs font-mono uppercase tracking-wider mb-3">Assigned Team</h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedProject.assignedElectricians.map((empId) => {
-                      const emp = db.getUserById(empId);
-                      return emp ? (
-                        <div key={empId} className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg">
-                          <div className="w-6 h-6 rounded-full bg-[#F2C94C]/20 flex items-center justify-center">
-                            <span className="text-xs text-[#F2C94C]">{emp.name.split(' ').map(n => n[0]).join('')}</span>
-                          </div>
-                          <span className="text-sm text-[#F6F7F9]">{emp.name}</span>
+                    {projectEmployees.map((emp) => (
+                      <div key={emp.id} className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg">
+                        <div className="w-6 h-6 rounded-full bg-[#F2C94C]/20 flex items-center justify-center">
+                          <span className="text-xs text-[#F2C94C]">{emp.name.split(' ').map((n: string) => n[0]).join('')}</span>
                         </div>
-                      ) : null;
-                    })}
+                        <span className="text-sm text-[#F6F7F9]">{emp.name}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -641,27 +657,24 @@ export function AdminProjects() {
 
                 {/* Invoices */}
                 <div>
-                  <h4 className="text-[#A9AFB8] text-xs font-mono uppercase tracking-wider mb-3">Invoices ({selectedProject.invoices.length})</h4>
-                  {selectedProject.invoices.length > 0 ? (
+                  <h4 className="text-[#A9AFB8] text-xs font-mono uppercase tracking-wider mb-3">Invoices ({projectInvoices.length})</h4>
+                  {projectInvoices.length > 0 ? (
                     <div className="space-y-2">
-                      {selectedProject.invoices.map((invId) => {
-                        const inv = db.getInvoiceById(invId);
-                        return inv ? (
-                          <div key={invId} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                            <div>
-                              <p className="text-[#F6F7F9] text-sm">{inv.invoiceNumber}</p>
-                              <p className="text-[#6A6D75] text-xs">{new Date(inv.issueDate).toLocaleDateString()}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[#F6F7F9] text-sm">${inv.total.toLocaleString()}</p>
-                              <span className={`text-xs ${inv.status === 'paid' ? 'text-green-400' :
-                                inv.status === 'overdue' ? 'text-red-400' :
-                                  'text-blue-400'
-                                }`}>{inv.status}</span>
-                            </div>
+                      {projectInvoices.map((inv) => (
+                        <div key={inv.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <div>
+                            <p className="text-[#F6F7F9] text-sm">{inv.invoiceNumber}</p>
+                            <p className="text-[#6A6D75] text-xs">{new Date(inv.issueDate).toLocaleDateString()}</p>
                           </div>
-                        ) : null;
-                      })}
+                          <div className="text-right">
+                            <p className="text-[#F6F7F9] text-sm">${inv.total.toLocaleString()}</p>
+                            <span className={`text-xs ${inv.status === 'paid' ? 'text-green-400' :
+                              inv.status === 'overdue' ? 'text-red-400' :
+                                'text-blue-400'
+                              }`}>{inv.status}</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <p className="text-[#6A6D75] text-sm">No invoices yet</p>

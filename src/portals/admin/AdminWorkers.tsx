@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Star, MapPin, Phone, Mail, Briefcase } from 'lucide-react';
 import type { User, UserRole } from '@/lib/database';
-import { db } from '@/lib/database';
+import { db } from '@/lib/supabase-database';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -18,8 +18,11 @@ export function AdminWorkers() {
   const [isViewOpen, setIsViewOpen] = useState(false);
 
   useEffect(() => {
-    const allUsers = db.getUsers();
-    setWorkers(allUsers.filter(u => u.role === 'employee' || u.role === 'subcontractor'));
+    const loadData = async () => {
+      const allUsers = await db.getUsers();
+      setWorkers(allUsers.filter((u: User) => u.role === 'employee' || u.role === 'subcontractor'));
+    };
+    loadData();
   }, []);
 
   const filteredWorkers = workers.filter(worker => {

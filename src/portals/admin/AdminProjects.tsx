@@ -81,6 +81,8 @@ export function AdminProjects() {
     invoices: [],
     expenses: [],
     history: [],
+    startDate: '',
+    actualEndDate: '',
   });
 
   useEffect(() => {
@@ -142,6 +144,8 @@ export function AdminProjects() {
       invoices: [],
       expenses: [],
       history: [],
+      startDate: '',
+      actualEndDate: '',
     });
     toast.success('Project created successfully');
   };
@@ -366,6 +370,27 @@ export function AdminProjects() {
                     <option value="high">High</option>
                     <option value="urgent">Urgent</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Start / Scheduled Date</label>
+                  <input
+                    type="date"
+                    value={newProject.startDate ? newProject.startDate.split('T')[0] : ''}
+                    onChange={(e) => setNewProject({ ...newProject, startDate: e.target.value ? new Date(e.target.value).toISOString() : '' })}
+                    className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C] [&::-webkit-calendar-picker-indicator]:filter-invert"
+                  />
+                </div>
+                <div>
+                  <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Completion / End Date</label>
+                  <input
+                    type="date"
+                    value={newProject.actualEndDate ? newProject.actualEndDate.split('T')[0] : ''}
+                    onChange={(e) => setNewProject({ ...newProject, actualEndDate: e.target.value ? new Date(e.target.value).toISOString() : '' })}
+                    className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C] [&::-webkit-calendar-picker-indicator]:filter-invert"
+                  />
                 </div>
               </div>
 

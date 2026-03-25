@@ -35,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const statusConfig: Record<ProjectStatus, { label: string; color: string; icon: React.ElementType }> = {
+const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   lead: { label: 'Lead', color: 'bg-gray-500/20 text-gray-400', icon: Clock },
   quoted: { label: 'Quoted', color: 'bg-blue-500/20 text-blue-400', icon: FileText },
   contracted: { label: 'Contracted', color: 'bg-purple-500/20 text-purple-400', icon: CheckCircle },
@@ -43,6 +43,8 @@ const statusConfig: Record<ProjectStatus, { label: string; color: string; icon: 
   inspection: { label: 'Inspection', color: 'bg-orange-500/20 text-orange-400', icon: AlertCircle },
   completed: { label: 'Completed', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
   cancelled: { label: 'Cancelled', color: 'bg-red-500/20 text-red-400', icon: PauseCircle },
+  pending: { label: 'Pending', color: 'bg-gray-500/20 text-gray-400', icon: Clock },
+  'on-hold': { label: 'On Hold', color: 'bg-red-500/20 text-red-400', icon: PauseCircle },
 };
 
 export function AdminProjects() {
@@ -509,14 +511,15 @@ export function AdminProjects() {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredProjects.map((project) => {
-          const StatusIcon = statusConfig[project.status].icon;
+          const config = statusConfig[project.status] || { label: project.status, color: 'bg-gray-500/20 text-gray-400', icon: Clock };
+          const StatusIcon = config.icon;
           return (
             <div key={project.id} className="glass-card rounded-xl p-5 hover:border-[#F2C94C]/30 transition-all group">
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
-                <div className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${statusConfig[project.status].color}`}>
+                <div className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${config.color}`}>
                   <StatusIcon className="w-3 h-3" />
-                  {statusConfig[project.status].label}
+                  {config.label}
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -595,9 +598,14 @@ export function AdminProjects() {
                 {/* Status & Priority & Progress */}
                 <div className="flex flex-col gap-4">
                   <div className="flex gap-3">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig[selectedProject.status].color}`}>
-                      {statusConfig[selectedProject.status].label}
-                    </span>
+                    {(() => {
+                      const config = statusConfig[selectedProject.status] || { label: selectedProject.status, color: 'bg-gray-500/20 text-gray-400', icon: Clock };
+                      return (
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
+                          {config.label}
+                        </span>
+                      );
+                    })()}
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedProject.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
                       selectedProject.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
                         selectedProject.priority === 'medium' ? 'bg-blue-500/20 text-blue-400' :

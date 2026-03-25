@@ -11,7 +11,8 @@ import {
   Sparkles,
   Mail,
   Zap,
-  Trash2
+  Trash2,
+  Clock
 } from 'lucide-react';
 import type { Invoice, InvoiceStatus, Project } from '@/lib/database';
 import { db } from '@/lib/supabase-database';
@@ -40,7 +41,7 @@ const COMPANY_INFO = {
   website: 'www.mscelectric.io'
 };
 
-const statusConfig: Record<InvoiceStatus, { label: string; color: string; icon: React.ElementType }> = {
+const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   draft: { label: 'Draft', color: 'bg-gray-500/20 text-gray-400', icon: FileText },
   sent: { label: 'Sent', color: 'bg-blue-500/20 text-blue-400', icon: Mail },
   viewed: { label: 'Viewed', color: 'bg-purple-500/20 text-purple-400', icon: Eye },
@@ -468,9 +469,10 @@ export function AdminInvoices() {
             </thead>
             <tbody>
               {filteredInvoices.map((invoice) => {
-                const StatusIcon = statusConfig[invoice.status].icon;
+                const config = statusConfig[invoice.status] || { label: invoice.status, color: 'bg-gray-500/20 text-gray-400', icon: Clock };
+                const StatusIcon = config.icon;
                 return (
-                  <tr key={invoice.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr key={invoice.id} className="border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group" onClick={() => setSelectedInvoice(invoice)}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <FileText className="w-5 h-5 text-[#F2C94C]" />
@@ -487,9 +489,9 @@ export function AdminInvoices() {
                       <p className="text-[#A9AFB8] text-sm">{getClientName(invoice.clientId)}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusConfig[invoice.status].color}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
                         <StatusIcon className="w-3 h-3" />
-                        {statusConfig[invoice.status].label}
+                        {config.label}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -605,9 +607,14 @@ export function AdminInvoices() {
                     <p className="text-[#F6F7F9] font-medium">{getClientName(selectedInvoice.clientId)}</p>
                   </div>
                   <div className="text-right">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig[selectedInvoice.status].color}`}>
-                      {statusConfig[selectedInvoice.status].label}
-                    </span>
+                    {(() => {
+                      const config = statusConfig[selectedInvoice.status] || { label: selectedInvoice.status, color: 'bg-gray-500/20 text-gray-400', icon: Clock };
+                      return (
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
+                          {config.label}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
 

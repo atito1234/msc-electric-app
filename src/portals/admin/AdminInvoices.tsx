@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
-import { 
-  Search, 
-  MoreVertical, 
-  Download, 
-  Send, 
+import {
+  Search,
+  MoreVertical,
+  Download,
+  Send,
   CheckCircle,
   AlertCircle,
   FileText,
   Eye,
   Sparkles,
-  Mail
+  Mail,
+  Zap,
+  Trash2
 } from 'lucide-react';
 import type { Invoice, InvoiceStatus, Project } from '@/lib/database';
 import { db } from '@/lib/database';
@@ -29,6 +31,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+// Define the company information
+const COMPANY_INFO = {
+  name: 'MSC Electric',
+  email: 'contact@mscelectric.io',
+  phone: '(512) 555-0199',
+  address: '123 Main St, Austin, TX 78701',
+  website: 'www.mscelectric.io'
+};
+
 const statusConfig: Record<InvoiceStatus, { label: string; color: string; icon: React.ElementType }> = {
   draft: { label: 'Draft', color: 'bg-gray-500/20 text-gray-400', icon: FileText },
   sent: { label: 'Sent', color: 'bg-blue-500/20 text-blue-400', icon: Mail },
@@ -47,7 +58,7 @@ export function AdminInvoices() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<any>(null);
-  
+
   const [newInvoice, setNewInvoice] = useState<Partial<Invoice>>({
     clientId: '',
     projectId: '',
@@ -75,7 +86,7 @@ export function AdminInvoices() {
 
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         invoice.clientId.toLowerCase().includes(searchQuery.toLowerCase());
+      invoice.clientId.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -89,10 +100,10 @@ export function AdminInvoices() {
       toast.error('Please select a project first');
       return;
     }
-    
+
     const project = projects.find(p => p.id === newInvoice.projectId);
     if (!project) return;
-    
+
     const suggestion = generateInvoiceWithAI(
       project,
       project.workOrders,
@@ -100,7 +111,7 @@ export function AdminInvoices() {
       project.materials,
       newInvoice.taxRate || 0.0825
     );
-    
+
     setAiSuggestion(suggestion);
     setNewInvoice({
       ...newInvoice,
@@ -112,6 +123,50 @@ export function AdminInvoices() {
       aiGenerated: true,
     });
     toast.success('AI invoice generated with ' + Math.round(suggestion.confidence * 100) + '% confidence');
+  };
+
+  const handleUpdateTotals = (newItems: any[]) => {
+    if (!aiSuggestion) return;
+    const newSubtotal = newItems.reduce((sum, item) => sum + item.total, 0);
+    const newTaxAmount = newSubtotal * (newInvoice.taxRate || 0.0825);
+    const newTotal = newSubtotal + newTaxAmount;
+
+    setAiSuggestion({
+      ...aiSuggestion,
+      items: newItems,
+      subtotal: newSubtotal,
+      taxAmount: newTaxAmount,
+      total: newTotal
+    });
+
+    setNewInvoice({
+      ...newInvoice,
+      items: newItems,
+      subtotal: newSubtotal,
+      taxAmount: newTaxAmount,
+      total: newTotal,
+      balanceDue: newTotal
+    });
+  };
+
+  const handleUpdateItem = (idx: number, field: string, value: any) => {
+    if (!aiSuggestion) return;
+    const newItems = [...aiSuggestion.items];
+    newItems[idx] = { ...newItems[idx], [field]: value };
+    newItems[idx].total = newItems[idx].quantity * newItems[idx].unitPrice;
+    handleUpdateTotals(newItems);
+  };
+
+  const handleAddItem = () => {
+    if (!aiSuggestion) return;
+    const newItems = [...aiSuggestion.items, { description: 'New Item', quantity: 1, unit: 'ea', unitPrice: 0, total: 0, category: 'labor' }];
+    handleUpdateTotals(newItems);
+  };
+
+  const handleRemoveItem = (idx: number) => {
+    if (!aiSuggestion) return;
+    const newItems = aiSuggestion.items.filter((_: any, i: number) => i !== idx);
+    handleUpdateTotals(newItems);
   };
 
   const handleCreateInvoice = () => {
@@ -127,7 +182,7 @@ export function AdminInvoices() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
+
     db.saveInvoice(invoice);
     setInvoices([...invoices, invoice]);
     setIsAddDialogOpen(false);
@@ -142,9 +197,9 @@ export function AdminInvoices() {
   };
 
   const handleMarkPaid = (invoice: Invoice) => {
-    const updated = { 
-      ...invoice, 
-      status: 'paid' as InvoiceStatus, 
+    const updated = {
+      ...invoice,
+      status: 'paid' as InvoiceStatus,
       paidDate: new Date().toISOString().split('T')[0],
       amountPaid: invoice.total,
       balanceDue: 0,
@@ -162,6 +217,30 @@ export function AdminInvoices() {
   const getProjectName = (projectId: string) => {
     const project = projects.find(p => p.id === projectId);
     return project?.name || projectId;
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!selectedInvoice) return;
+    const element = document.getElementById('printable-invoice');
+    if (!element) return;
+
+    try {
+      // @ts-ignore
+      const html2pdf = (await import('html2pdf.js')).default;
+      const opt: any = {
+        margin: 0.5,
+        filename: `${selectedInvoice.invoiceNumber}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+      toast.success('Invoice PDF is downloading');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
+    }
   };
 
   return (
@@ -188,7 +267,7 @@ export function AdminInvoices() {
           <h2 className="font-display font-bold text-2xl text-[#F6F7F9]">Invoices</h2>
           <p className="text-[#A9AFB8]">Manage invoices and track payments</p>
         </div>
-        
+
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <button className="btn-primary flex items-center gap-2">
@@ -214,7 +293,7 @@ export function AdminInvoices() {
                   ))}
                 </select>
               </div>
-              
+
               {newInvoice.projectId && (
                 <button
                   onClick={handleGenerateAIInvoice}
@@ -224,7 +303,7 @@ export function AdminInvoices() {
                   Analyze Project & Generate Invoice
                 </button>
               )}
-              
+
               {aiSuggestion && (
                 <div className="space-y-4">
                   <div className="p-4 bg-[#F2C94C]/10 rounded-lg">
@@ -232,22 +311,49 @@ export function AdminInvoices() {
                     <p className="text-[#A9AFB8] text-xs">{aiSuggestion.reasoning}</p>
                     <p className="text-[#6A6D75] text-xs mt-2">Confidence: {Math.round(aiSuggestion.confidence * 100)}%</p>
                   </div>
-                  
+
                   <div>
-                    <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Line Items</label>
-                    <div className="space-y-2">
+                    <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Line Items (Editable)</label>
+                    <div className="space-y-3">
                       {aiSuggestion.items.map((item: any, idx: number) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                          <div>
-                            <p className="text-[#F6F7F9] text-sm">{item.description}</p>
-                            <p className="text-[#6A6D75] text-xs">{item.quantity} {item.unit} × ${item.unitPrice}</p>
+                        <div key={idx} className="flex flex-col md:flex-row items-start md:items-center justify-between p-3 bg-white/5 rounded-lg gap-3">
+                          <div className="flex-1 w-full space-y-2">
+                            <input
+                              type="text"
+                              value={item.description}
+                              onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
+                              className="w-full bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                value={item.quantity}
+                                onChange={(e) => handleUpdateItem(idx, 'quantity', Number(e.target.value))}
+                                className="w-20 bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-xs text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                              />
+                              <span className="text-[#6A6D75] text-xs">× $</span>
+                              <input
+                                type="number"
+                                value={item.unitPrice}
+                                onChange={(e) => handleUpdateItem(idx, 'unitPrice', Number(e.target.value))}
+                                className="w-24 bg-[#0B0C0F] border border-white/10 rounded px-2 py-1 text-xs text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                              />
+                            </div>
                           </div>
-                          <p className="text-[#F6F7F9] font-medium">${item.total.toFixed(2)}</p>
+                          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                            <p className="text-[#F6F7F9] font-medium min-w-[4rem] text-right">${item.total.toFixed(2)}</p>
+                            <button onClick={() => handleRemoveItem(idx)} className="text-red-400 hover:text-red-300 p-1">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       ))}
+                      <button onClick={handleAddItem} className="text-xs text-[#F2C94C] hover:underline mt-2 flex items-center gap-1">
+                        + Add Line Item
+                      </button>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Subtotal</label>
@@ -258,14 +364,14 @@ export function AdminInvoices() {
                       <p className="text-[#F6F7F9]">${aiSuggestion.taxAmount.toFixed(2)}</p>
                     </div>
                   </div>
-                  
+
                   <div className="p-4 bg-white/5 rounded-lg">
                     <div className="flex items-center justify-between">
                       <span className="text-[#F6F7F9] font-medium">Total</span>
                       <span className="text-[#F2C94C] text-xl font-display font-bold">${aiSuggestion.total.toFixed(2)}</span>
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={handleCreateInvoice}
                     className="w-full btn-primary py-3"
@@ -362,17 +468,27 @@ export function AdminInvoices() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-[#111318] border-white/10">
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer"
                             onClick={() => { setSelectedInvoice(invoice); setIsViewDialogOpen(true); }}
                           >
                             <Eye className="w-4 h-4 mr-2" /> View
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer">
+                          <DropdownMenuItem
+                            className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer"
+                            onClick={() => {
+                              setSelectedInvoice(invoice);
+                              // Use a slight delay to allow the dialog to open and render the printable element
+                              setTimeout(() => {
+                                setIsViewDialogOpen(true);
+                                setTimeout(handleDownloadPDF, 100);
+                              }, 0);
+                            }}
+                          >
                             <Download className="w-4 h-4 mr-2" /> Download PDF
                           </DropdownMenuItem>
                           {invoice.status === 'draft' && (
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer"
                               onClick={() => handleSendInvoice(invoice)}
                             >
@@ -380,7 +496,7 @@ export function AdminInvoices() {
                             </DropdownMenuItem>
                           )}
                           {(invoice.status === 'sent' || invoice.status === 'viewed' || invoice.status === 'overdue') && (
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               className="text-green-400 focus:bg-green-500/10 cursor-pointer"
                               onClick={() => handleMarkPaid(invoice)}
                             >
@@ -400,19 +516,47 @@ export function AdminInvoices() {
 
       {/* View Invoice Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="bg-[#111318] border-white/10 max-w-2xl">
+        <DialogContent className="bg-[#111318] border-white/10 max-w-3xl overflow-y-auto max-h-[90vh]">
           {selectedInvoice && (
             <>
-              <DialogHeader>
+              <DialogHeader className="flex flex-row justify-between items-center mr-8">
                 <DialogTitle className="text-[#F6F7F9] font-display flex items-center gap-3">
                   {selectedInvoice.invoiceNumber}
                   {selectedInvoice.aiGenerated && (
                     <span className="text-xs text-[#F2C94C] bg-[#F2C94C]/10 px-2 py-1 rounded">AI Generated</span>
                   )}
                 </DialogTitle>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="btn-primary py-2 px-4 shadow-xl flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" /> Download PDF
+                </button>
               </DialogHeader>
-              <div className="space-y-6 mt-4">
-                <div className="flex justify-between items-start">
+
+              {/* Printable Wrapper */}
+              <div id="printable-invoice" className="bg-[#1a1d24] p-8 rounded-lg mt-4 text-[#F6F7F9]">
+
+                {/* Invoice Header: Company Info & Logo */}
+                <div className="flex justify-between items-start border-b border-white/10 pb-6 mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-xl bg-[#F2C94C]/20 flex items-center justify-center">
+                      <Zap className="w-8 h-8 text-[#F2C94C]" />
+                    </div>
+                    <div>
+                      <h2 className="font-display font-bold text-2xl text-[#F6F7F9]">{COMPANY_INFO.name}</h2>
+                      <p className="text-[#A9AFB8] text-sm">{COMPANY_INFO.address}</p>
+                      <p className="text-[#A9AFB8] text-sm">{COMPANY_INFO.email} • {COMPANY_INFO.phone}</p>
+                      <p className="text-[#A9AFB8] text-sm">{COMPANY_INFO.website}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <h1 className="text-4xl font-display font-bold text-[#F2C94C] uppercase tracking-wider mb-2">Invoice</h1>
+                    <p className="text-[#A9AFB8] font-mono">{selectedInvoice.invoiceNumber}</p>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-start mb-8">
                   <div>
                     <p className="text-[#6A6D75] text-xs">Bill To</p>
                     <p className="text-[#F6F7F9] font-medium">{getClientName(selectedInvoice.clientId)}</p>
@@ -454,7 +598,7 @@ export function AdminInvoices() {
                   </div>
                 </div>
 
-                <div className="border-t border-white/10 pt-4 space-y-2">
+                <div className="border-t border-white/10 pt-4 space-y-2 mb-8">
                   <div className="flex justify-between text-sm">
                     <span className="text-[#A9AFB8]">Subtotal</span>
                     <span className="text-[#F6F7F9]">${selectedInvoice.subtotal.toFixed(2)}</span>
@@ -480,19 +624,23 @@ export function AdminInvoices() {
                     </div>
                   )}
                   {selectedInvoice.balanceDue > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#A9AFB8]">Balance Due</span>
+                    <div className="flex justify-between text-sm font-bold">
+                      <span className="text-red-400">Balance Due</span>
                       <span className="text-red-400">${selectedInvoice.balanceDue.toFixed(2)}</span>
                     </div>
                   )}
                 </div>
 
                 {selectedInvoice.notes && (
-                  <div>
-                    <p className="text-[#6A6D75] text-xs mb-1">Notes</p>
+                  <div className="mb-6">
+                    <p className="text-[#6A6D75] text-xs font-mono uppercase tracking-wider mb-1">Notes</p>
                     <p className="text-[#A9AFB8] text-sm">{selectedInvoice.notes}</p>
                   </div>
                 )}
+
+                <div className="mt-8 pt-6 border-t border-white/10 text-center text-[#6A6D75] text-xs">
+                  Thank you for your business! If you have any questions regarding this invoice, please contact us.
+                </div>
               </div>
             </>
           )}

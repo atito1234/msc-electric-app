@@ -54,6 +54,11 @@ export function AdminProjects() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [aiEstimate, setAiEstimate] = useState<any>(null);
 
+  // Quick Client Creation State
+  const [isAddingClient, setIsAddingClient] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
+  const [newClientEmail, setNewClientEmail] = useState('');
+
   // New project form state
   const [newProject, setNewProject] = useState<Partial<Project>>({
     name: '',
@@ -156,6 +161,29 @@ export function AdminProjects() {
     toast.success('AI estimate generated');
   };
 
+  const handleCreateClient = () => {
+    if (!newClientName || !newClientEmail) {
+      toast.error('Please enter client name and email');
+      return;
+    }
+    const newClient: User = {
+      id: `client-${Date.now()}`,
+      name: newClientName,
+      email: newClientEmail,
+      role: 'client',
+      password: 'client123',
+      createdAt: new Date().toISOString(),
+      isActive: true,
+    };
+    db.saveUser(newClient);
+    setClients([...clients, newClient]);
+    setNewProject({ ...newProject, clientId: newClient.id });
+    setIsAddingClient(false);
+    setNewClientName('');
+    setNewClientEmail('');
+    toast.success('Client created successfully');
+  };
+
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
     return client?.name || clientId;
@@ -194,17 +222,51 @@ export function AdminProjects() {
               </div>
 
               <div>
-                <label className="block font-mono text-xs text-[#A9AFB8] mb-2">Client</label>
-                <select
-                  value={newProject.clientId}
-                  onChange={(e) => setNewProject({ ...newProject, clientId: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
-                >
-                  <option value="">Select client</option>
-                  {clients.map(client => (
-                    <option key={client.id} value={client.id}>{client.name}</option>
-                  ))}
-                </select>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block font-mono text-xs text-[#A9AFB8]">Client</label>
+                  <button
+                    onClick={() => setIsAddingClient(!isAddingClient)}
+                    className="text-xs text-[#F2C94C] hover:underline"
+                  >
+                    {isAddingClient ? 'Cancel' : '+ New Client'}
+                  </button>
+                </div>
+
+                {isAddingClient ? (
+                  <div className="space-y-3 p-3 bg-white/5 border border-[#F2C94C]/30 rounded-lg">
+                    <input
+                      type="text"
+                      placeholder="Client Full Name"
+                      value={newClientName}
+                      onChange={(e) => setNewClientName(e.target.value)}
+                      className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Client Email"
+                      value={newClientEmail}
+                      onChange={(e) => setNewClientEmail(e.target.value)}
+                      className="w-full bg-[#0B0C0F] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                    />
+                    <button
+                      onClick={handleCreateClient}
+                      className="w-full py-2 bg-[#F2C94C]/20 text-[#F2C94C] rounded-lg text-sm hover:bg-[#F2C94C]/30 transition-colors font-medium"
+                    >
+                      Save & Select Client
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={newProject.clientId}
+                    onChange={(e) => setNewProject({ ...newProject, clientId: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-[#F6F7F9] focus:outline-none focus:border-[#F2C94C]"
+                  >
+                    <option value="">Select client</option>
+                    {clients.map(client => (
+                      <option key={client.id} value={client.id}>{client.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div>

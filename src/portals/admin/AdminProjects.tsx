@@ -123,25 +123,36 @@ export function AdminProjects() {
   });
 
   const handleAddProject = async () => {
+    const isEditing = !!newProject.id;
     const { id: _, ...projectData } = newProject as Project;
 
     let finalDescription = projectData.description || '';
-    if (projectComponents.length > 0) {
+    if (projectComponents.length > 0 && !isEditing) {
       finalDescription += '\n\nProject Components:\n' + projectComponents.map(c => `- ${c.name}: $${c.price}`).join('\n');
     }
 
     const project: Project = {
-      id: `proj-${Date.now()}`,
-      ...projectData,
+      ...(newProject as Project),
+      id: newProject.id || `proj-${Date.now()}`,
       description: finalDescription,
-      address: { street: '', city: '', state: '', zip: '' },
-      actualValue: 0,
-      createdAt: new Date().toISOString(),
+      ...(!isEditing && {
+        address: { street: '', city: '', state: '', zip: '' },
+        actualValue: 0,
+        createdAt: new Date().toISOString(),
+      }),
       updatedAt: new Date().toISOString(),
     };
 
     await db.saveProject(project);
-    setProjects([...projects, project]);
+
+    if (isEditing) {
+      setProjects(projects.map(p => p.id === project.id ? project : p));
+      toast.success('Project updated successfully');
+    } else {
+      setProjects([project, ...projects]);
+      toast.success('Project created successfully');
+    }
+
     setIsAddDialogOpen(false);
     setProjectComponents([]);
     setNewProject({
@@ -274,8 +285,10 @@ export function AdminProjects() {
           </DialogTrigger>
           <DialogContent className="bg-[#111318] border-white/10 max-w-4xl max-h-[90vh] overflow-y-auto w-[calc(100vw-2rem)] md:w-full">
             <DialogHeader>
-              <DialogTitle className="text-[#F6F7F9] font-display">Create New Project</DialogTitle>
-              <DialogDescription className="sr-only">Fill out this form to create a new project.</DialogDescription>
+              <DialogTitle className="text-[#F6F7F9] font-display">
+                {newProject.id ? 'Edit Project' : 'Create New Project'}
+              </DialogTitle>
+              <DialogDescription className="sr-only">Fill out this form to modify the project.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
@@ -534,7 +547,15 @@ export function AdminProjects() {
                     >
                       <Eye className="w-4 h-4 mr-2" /> View Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer">
+                    <DropdownMenuItem
+                      className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer"
+                      onClick={() => {
+                        setNewProject(project);
+                        setProjectComponents([]);
+                        setAiEstimate(null);
+                        setIsAddDialogOpen(true);
+                      }}
+                    >
                       <Edit className="w-4 h-4 mr-2" /> Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem

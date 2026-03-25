@@ -178,25 +178,29 @@ export const db: Database = {
     saveProject: async (project: Partial<Project> & { id?: string }): Promise<void> => {
         // Map to DB shape
         const dbProject = {
-            // id is auto-handled on insert if missing, or used for update
+            ...(project.id ? { id: project.id } : {}),
             client_id: project.clientId,
             name: project.name,
             description: project.description,
             status: project.status,
-            address: project.address, // assuming JSONB or text
+            address: project.address,
             estimated_value: project.estimatedValue,
+            actual_value: project.actualValue,
             assigned_electricians: project.assignedElectricians,
             assigned_subcontractors: project.assignedSubcontractors,
             start_date: project.startDate,
             document_url: project.documentUrl,
             ai_quote_status: project.aiQuoteStatus,
-            // ...
+            progress: project.progress,
+            priority: project.priority,
+            created_at: project.createdAt,
+            updated_at: project.updatedAt
         };
 
-        if (project.id) {
-            await supabase.from('projects').update(dbProject).eq('id', project.id);
-        } else {
-            await supabase.from('projects').insert(dbProject);
+        const { error } = await supabase.from('projects').upsert(dbProject);
+        if (error) {
+            console.error('Failed to save project:', error);
+            throw error;
         }
     },
 
@@ -245,19 +249,19 @@ export const db: Database = {
 
     saveInvoice: async (invoice: Partial<Invoice> & { id?: string }): Promise<void> => {
         const dbInvoice = {
+            ...(invoice.id ? { id: invoice.id } : {}),
             project_id: invoice.projectId,
             client_id: invoice.clientId,
             amount: invoice.total,
             status: invoice.status,
             due_date: invoice.dueDate,
             items: invoice.items, // JSONB
+            created_at: invoice.createdAt,
+            updated_at: invoice.updatedAt
         };
 
-        if (invoice.id) {
-            await supabase.from('invoices').update(dbInvoice).eq('id', invoice.id);
-        } else {
-            await supabase.from('invoices').insert(dbInvoice);
-        }
+        const { error } = await supabase.from('invoices').upsert(dbInvoice);
+        if (error) throw error;
     },
 
     // Contracts

@@ -35,7 +35,7 @@ import {
 // Define the company information
 const COMPANY_INFO = {
   name: 'MSC Electric',
-  email: 'contact@mscelectric.io',
+  email: 'admin@mscelectric.io',
   phone: '(512) 555-0199',
   address: '123 Main St, Austin, TX 78701',
   website: 'www.mscelectric.io'
@@ -174,8 +174,7 @@ export function AdminInvoices() {
 
   const handleCreateInvoice = async () => {
     const { id: _, ...invoiceData } = newInvoice as Invoice;
-    const invoice: Invoice = {
-      id: `inv-${Date.now()}`,
+    const invoice: Partial<Invoice> = {
       ...invoiceData,
       invoiceNumber: `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(4, '0')}`,
       issueDate: new Date().toISOString().split('T')[0],
@@ -186,10 +185,15 @@ export function AdminInvoices() {
       updatedAt: new Date().toISOString(),
     };
 
-    await db.saveInvoice(invoice);
-    setInvoices([...invoices, invoice]);
-    setIsAddDialogOpen(false);
-    toast.success('Invoice created successfully');
+    try {
+      await db.saveInvoice(invoice);
+      await loadData();
+      setIsAddDialogOpen(false);
+      toast.success('Invoice created successfully');
+    } catch (err) {
+      console.error('Save failed:', err);
+      toast.error('Failed to create invoice.');
+    }
   };
 
   const handleSendInvoice = async (invoice: Invoice) => {

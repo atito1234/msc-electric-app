@@ -131,9 +131,9 @@ export function AdminProjects() {
       finalDescription += '\n\nProject Components:\n' + projectComponents.map(c => `- ${c.name}: $${c.price}`).join('\n');
     }
 
-    const project: Project = {
-      ...(newProject as Project),
-      id: newProject.id || `proj-${Date.now()}`,
+    const project: Partial<Project> = {
+      ...newProject,
+      ...(isEditing ? { id: newProject.id } : {}),
       description: finalDescription,
       ...(!isEditing && {
         address: { street: '', city: '', state: '', zip: '' },
@@ -143,14 +143,19 @@ export function AdminProjects() {
       updatedAt: new Date().toISOString(),
     };
 
-    await db.saveProject(project);
+    try {
+      await db.saveProject(project);
 
-    if (isEditing) {
-      setProjects(projects.map(p => p.id === project.id ? project : p));
-      toast.success('Project updated successfully');
-    } else {
-      setProjects([project, ...projects]);
-      toast.success('Project created successfully');
+      await loadData(); // Resync fresh DB state with valid UUIDs
+
+      if (isEditing) {
+        toast.success('Project updated successfully');
+      } else {
+        toast.success('Project created successfully');
+      }
+    } catch (err) {
+      console.error('Save failed:', err);
+      toast.error('Failed to save project. Please check if all fields are valid.');
     }
 
     setIsAddDialogOpen(false);
@@ -183,6 +188,43 @@ export function AdminProjects() {
     await db.deleteProject(id);
     setProjects(projects.filter(p => p.id !== id));
     toast.success('Project deleted');
+  };
+
+  const handleGenerateInvoiceFromProject = async (project: Project) => {
+    try {
+      const newInvoice = {
+        projectId: project.id,
+        clientId: project.clientId,
+        status: 'draft',
+        total: project.estimatedValue || 0,
+        balanceDue: project.estimatedValue || 0,
+        amountPaid: 0,
+        aiGenerated: false,
+        invoiceNumber: `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`,
+        issueDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        items: [
+          {
+            description: `Services rendered for: ${project.name}`,
+            quantity: 1,
+            unit: 'project',
+            unitPrice: project.estimatedValue || 0,
+            total: project.estimatedValue || 0,
+            category: 'labor'
+          }
+        ],
+        createdBy: 'user-admin-1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // @ts-ignore - Supabase DB correctly accepts Partial<Invoice> including the items array structure
+      await db.saveInvoice(newInvoice);
+      toast.success('Invoice generated! Go to the Invoices tab to view and download it.');
+    } catch (error) {
+      console.error('Failed to generate invoice:', error);
+      toast.error('Failed to generate invoice automatically.');
+    }
   };
 
   const handleGenerateAIEstimate = () => {
@@ -613,6 +655,14 @@ export function AdminProjects() {
             <>
               <DialogHeader className="flex flex-row justify-between items-center mr-8">
                 <DialogTitle className="text-[#F6F7F9] font-display text-xl">{selectedProject?.name}</DialogTitle>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => selectedProject && handleGenerateInvoiceFromProject(selectedProject)}
+                    className="flex items-center gap-2 bg-[#F2C94C] text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#F2C94C]/90 transition-colors"
+                  >
+                    <FileText className="w-4 h-4" /> Generate Invoice
+                  </button>
+                </div>
                 <DialogDescription className="sr-only">Viewing details for project {selectedProject?.name}</DialogDescription>
               </DialogHeader>
               <div className="space-y-6 mt-4">

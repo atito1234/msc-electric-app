@@ -8,13 +8,18 @@ const mapProjectFromDB = (p: any): Project => ({
     assignedElectricians: p.assigned_electricians || [],
     assignedSubcontractors: p.assigned_subcontractors || [],
     workOrders: p.work_orders ? p.work_orders.map(mapWorkOrderFromDB) : [],
-    estimatedValue: p.estimated_value,
-    actualValue: p.actual_value,
-    startDate: p.start_date,
-    estimatedEndDate: p.end_date,
-    actualEndDate: p.end_date,
-    projectManagerId: p.project_manager_id,
+    estimatedValue: p.estimated_value || 0,
+    actualValue: p.actual_value || 0,
+    progress: p.progress || 0,
+    startDate: p.start_date || null,
+    estimatedEndDate: p.end_date || null,
+    actualEndDate: p.end_date || null,
+    projectManagerId: p.project_manager_id || null,
     // Ensure strict types for arrays if DB returns null
+    materials: p.materials || [],
+    timeEntries: p.time_entries || [],
+    photos: p.photos || [],
+    notes: p.notes || [],
     createdAt: p.created_at,
     updatedAt: p.updated_at
 });
@@ -33,13 +38,13 @@ const mapInvoiceFromDB = (i: any): Invoice => ({
     clientId: i.client_id,
     dueDate: i.due_date,
     paidDate: i.paid_date,
-    total: i.amount,
-    balanceDue: i.status === 'paid' ? 0 : i.amount,
+    total: i.amount || 0,
+    balanceDue: i.status === 'paid' ? 0 : (i.amount || 0),
     invoiceNumber: `INV-${new Date(i.created_at || Date.now()).getFullYear()}-${i.id?.split('-')[0] || '100'}`,
-    status: i.status,
-    items: [{ description: 'Total Services Rendered', quantity: 1, unit: 'ea', unitPrice: i.amount, total: i.amount, category: 'labor' }],
-    createdAt: i.created_at,
-    updatedAt: i.updated_at
+    status: i.status || 'draft',
+    items: [{ description: 'Total Services Rendered', quantity: 1, unit: 'ea', unitPrice: i.amount || 0, total: i.amount || 0, category: 'labor' }],
+    createdAt: i.created_at || new Date().toISOString(),
+    updatedAt: i.updated_at || new Date().toISOString()
 });
 
 const mapUserFromDB = (u: any): User => ({

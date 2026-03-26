@@ -11,16 +11,12 @@ const mapProjectFromDB = (p: any): Project => ({
     estimatedValue: p.estimated_value,
     actualValue: p.actual_value,
     startDate: p.start_date,
-    estimatedEndDate: p.estimated_end_date,
-    actualEndDate: p.actual_end_date,
-    documentUrl: p.document_url,
-    aiQuoteStatus: p.ai_quote_status,
+    estimatedEndDate: p.end_date,
+    actualEndDate: p.end_date,
     projectManagerId: p.project_manager_id,
     // Ensure strict types for arrays if DB returns null
-    materials: p.materials || [],
-    timeEntries: p.time_entries || [],
-    photos: p.photos || [],
-    notes: p.notes || [],
+    createdAt: p.created_at,
+    updatedAt: p.updated_at
 });
 
 const mapWorkOrderFromDB = (w: any): WorkOrder => ({
@@ -37,6 +33,13 @@ const mapInvoiceFromDB = (i: any): Invoice => ({
     clientId: i.client_id,
     dueDate: i.due_date,
     paidDate: i.paid_date,
+    total: i.amount,
+    balanceDue: i.status === 'paid' ? 0 : i.amount,
+    invoiceNumber: `INV-${new Date(i.created_at || Date.now()).getFullYear()}-${i.id?.split('-')[0] || '100'}`,
+    status: i.status,
+    items: [{ description: 'Total Services Rendered', quantity: 1, unit: 'ea', unitPrice: i.amount, total: i.amount, category: 'labor' }],
+    createdAt: i.created_at,
+    updatedAt: i.updated_at
 });
 
 const mapUserFromDB = (u: any): User => ({
@@ -185,14 +188,10 @@ export const db: Database = {
             status: project.status,
             address: project.address,
             estimated_value: project.estimatedValue,
-            actual_value: project.actualValue,
             assigned_electricians: project.assignedElectricians,
             assigned_subcontractors: project.assignedSubcontractors,
             start_date: project.startDate,
-            document_url: project.documentUrl,
-            ai_quote_status: project.aiQuoteStatus,
-            progress: project.progress,
-            priority: project.priority,
+            end_date: project.actualEndDate || project.estimatedEndDate,
             created_at: project.createdAt,
             updated_at: project.updatedAt
         };
@@ -255,7 +254,6 @@ export const db: Database = {
             amount: invoice.total,
             status: invoice.status,
             due_date: invoice.dueDate,
-            items: invoice.items, // JSONB
             created_at: invoice.createdAt,
             updated_at: invoice.updatedAt
         };

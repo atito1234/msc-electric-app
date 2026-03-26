@@ -643,6 +643,18 @@ export function AdminProjects() {
                   <span>{project.assignedElectricians.length + project.assignedSubcontractors.length}</span>
                 </div>
               </div>
+
+              {project.status === 'completed' && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGenerateInvoiceFromProject(project);
+                  }}
+                  className="w-full mt-4 flex items-center justify-center gap-2 bg-[#F2C94C]/10 text-[#F2C94C] hover:bg-[#F2C94C]/20 border border-[#F2C94C]/20 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <FileText className="w-4 h-4" /> 1-Click Invoice
+                </button>
+              )}
             </div>
           );
         })}
@@ -677,12 +689,12 @@ export function AdminProjects() {
                         </span>
                       );
                     })()}
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedProject.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                      selectedProject.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                        selectedProject.priority === 'medium' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-gray-500/20 text-gray-400'
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${(selectedProject.priority || 'medium') === 'urgent' ? 'bg-red-500/20 text-red-400' :
+                        (selectedProject.priority || 'medium') === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                          (selectedProject.priority || 'medium') === 'medium' ? 'bg-blue-500/20 text-blue-400' :
+                            'bg-gray-500/20 text-gray-400'
                       }`}>
-                      {selectedProject.priority.charAt(0).toUpperCase() + selectedProject.priority.slice(1)} Priority
+                      {(selectedProject.priority || 'medium').charAt(0).toUpperCase() + (selectedProject.priority || 'medium').slice(1)} Priority
                     </span>
                   </div>
 

@@ -11,6 +11,7 @@ const mapProjectFromDB = (p: any): Project => ({
     estimatedValue: p.estimated_value || 0,
     actualValue: p.actual_value || 0,
     progress: p.progress || 0,
+    priority: p.priority || 'medium',
     startDate: p.start_date || null,
     estimatedEndDate: p.end_date || null,
     actualEndDate: p.end_date || null,

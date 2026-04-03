@@ -669,7 +669,7 @@ export function AdminProjects() {
       </div >
 
       {/* View Project Dialog */}
-      < Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen} >
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="bg-[#111318] border-white/10 max-w-3xl overflow-y-auto max-h-[90vh]">
           {selectedProject && (
             <>
@@ -820,7 +820,7 @@ export function AdminProjects() {
             </>
           )}
         </DialogContent>
-      </Dialog >
-    </div >
+      </Dialog>
+    </div>
   );
 }

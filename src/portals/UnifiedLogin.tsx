@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Eye, EyeOff, Lock, User, Building2, HardHat, Wrench, Database } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
-import { seedSupabase } from '@/utils/seed-data';
 
 type UserType = 'admin' | 'client' | 'employee' | 'subcontractor' | 'gc';
 
@@ -32,30 +31,6 @@ const loginOptions: LoginOption[] = [
     demoEmail: 'johnson.family@email.com',
     demoPassword: 'client123',
   },
-  {
-    type: 'employee',
-    label: 'Employee',
-    icon: HardHat,
-    description: 'View assigned projects, log time, and access work orders',
-    demoEmail: 'carlos.martinez@mscelectric.com',
-    demoPassword: 'employee123',
-  },
-  {
-    type: 'subcontractor',
-    label: 'Subcontractor',
-    icon: Wrench,
-    description: 'Access assigned projects and submit work completion',
-    demoEmail: 'juan.rodriguez@jrelectric.com',
-    demoPassword: 'sub123456',
-  },
-  {
-    type: 'gc',
-    label: 'GC Partner',
-    icon: Zap,
-    description: 'Upload blueprints, solicit bids, and track developments',
-    demoEmail: 'builder@apexconstruction.com',
-    demoPassword: 'gc123456',
-  },
 ];
 
 export function UnifiedLogin() {
@@ -66,7 +41,6 @@ export function UnifiedLogin() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showDemoInfo, setShowDemoInfo] = useState(false);
 
   // Redirect if already logged in
   if (isAuthenticated && user) {
@@ -179,27 +153,6 @@ export function UnifiedLogin() {
                   </button>
                 ))}
               </div>
-
-              <button
-                onClick={() => setShowDemoInfo(!showDemoInfo)}
-                className="w-full text-center text-[#F2C94C] text-sm hover:underline mt-6"
-              >
-                {showDemoInfo ? 'Hide Demo Credentials' : 'Show Demo Credentials'}
-              </button>
-
-              {showDemoInfo && (
-                <div className="glass-card rounded-xl p-4 mt-4">
-                  <p className="text-[#A9AFB8] text-sm mb-3">Demo Login Credentials:</p>
-                  <div className="space-y-2 text-xs font-mono">
-                    {loginOptions.map(opt => (
-                      <div key={opt.type} className="flex justify-between text-[#6A6D75]">
-                        <span>{opt.label}:</span>
-                        <span>{opt.demoEmail} / {opt.demoPassword}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             // Login Form
@@ -287,12 +240,6 @@ export function UnifiedLogin() {
                   )}
                 </button>
               </form>
-
-              <div className="mt-6 p-4 bg-[#F2C94C]/10 rounded-lg">
-                <p className="text-[#F2C94C] text-xs font-mono text-center">
-                  Demo: {email} / {password}
-                </p>
-              </div>
             </div>
           )}
 
@@ -304,17 +251,6 @@ export function UnifiedLogin() {
             >
               ← Back to website
             </a>
-          </div>
-
-          {/* Seed Data Button (Dev Only) */}
-          <div className="mt-4 text-center">
-            <button
-              onClick={seedSupabase}
-              className="text-[#F2C94C]/50 text-xs hover:text-[#F2C94C] flex items-center justify-center gap-1 mx-auto transition-colors"
-            >
-              <Database className="w-3 h-3" />
-              Seed Demo Database
-            </button>
           </div>
         </div>
       </div >

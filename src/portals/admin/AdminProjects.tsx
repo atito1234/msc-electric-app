@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -17,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import type { Project, ProjectStatus, User, Invoice } from '@/lib/database';
+import { useAuth } from '@/lib/auth-context';
 import { db } from '@/lib/supabase-database';
 import { estimateCostWithAI } from '@/lib/ai-service';
 import { toast } from 'sonner';
@@ -48,6 +50,8 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
 };
 
 export function AdminProjects() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [clients, setClients] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,14 +217,15 @@ export function AdminProjects() {
             category: 'labor'
           }
         ],
-        createdBy: 'user-admin-1',
+        createdBy: user?.id || 'user-admin-1',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
       // @ts-ignore - Supabase DB correctly accepts Partial<Invoice> including the items array structure
       await db.saveInvoice(newInvoice);
-      toast.success('Invoice generated! Go to the Invoices tab to view and download it.');
+      toast.success('Invoice generated successfully!');
+      navigate('/admin/invoices');
     } catch (error) {
       console.error('Failed to generate invoice:', error);
       toast.error('Failed to generate invoice automatically.');
@@ -569,19 +574,20 @@ export function AdminProjects() {
           const config = statusConfig[project.status] || { label: project.status, color: 'bg-gray-500/20 text-gray-400', icon: Clock };
           const StatusIcon = config.icon;
           return (
-            <div key={project.id} className="glass-card rounded-xl p-5 hover:border-[#F2C94C]/30 transition-all group">
-              {/* Header */}
+            <div key={project.id} className="glass-card rounded-xl p-6 hover:border-[#F2C94C]/30 transition-all cursor-pointer group" onClick={() => { setSelectedProject(project); setIsViewDialogOpen(true); }}>
               <div className="flex items-start justify-between mb-4">
-                <div className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${config.color}`}>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
                   <StatusIcon className="w-3 h-3" />
                   {config.label}
-                </div>
+                </span>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="p-1 text-[#6A6D75] hover:text-[#F6F7F9] opacity-0 group-hover:opacity-100 transition-opacity">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
-                  </DropdownMenuTrigger>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuTrigger asChild>
+                      <button className="p-1 text-[#6A6D75] hover:text-[#F6F7F9] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                  </div>
                   <DropdownMenuContent align="end" className="bg-[#111318] border-white/10">
                     <DropdownMenuItem
                       className="text-[#F6F7F9] focus:bg-white/10 cursor-pointer"
@@ -644,24 +650,26 @@ export function AdminProjects() {
                 </div>
               </div>
 
-              {project.status === 'completed' && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleGenerateInvoiceFromProject(project);
-                  }}
-                  className="w-full mt-4 flex items-center justify-center gap-2 bg-[#F2C94C]/10 text-[#F2C94C] hover:bg-[#F2C94C]/20 border border-[#F2C94C]/20 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <FileText className="w-4 h-4" /> 1-Click Invoice
-                </button>
-              )}
-            </div>
+              {
+                project.status === 'completed' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGenerateInvoiceFromProject(project);
+                    }}
+                    className="w-full mt-4 flex items-center justify-center gap-2 bg-[#F2C94C]/10 text-[#F2C94C] hover:bg-[#F2C94C]/20 border border-[#F2C94C]/20 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <FileText className="w-4 h-4" /> 1-Click Invoice
+                  </button>
+                )
+              }
+            </div >
           );
         })}
-      </div>
+      </div >
 
       {/* View Project Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+      < Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen} >
         <DialogContent className="bg-[#111318] border-white/10 max-w-3xl overflow-y-auto max-h-[90vh]">
           {selectedProject && (
             <>
@@ -690,9 +698,9 @@ export function AdminProjects() {
                       );
                     })()}
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${(selectedProject.priority || 'medium') === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                        (selectedProject.priority || 'medium') === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                          (selectedProject.priority || 'medium') === 'medium' ? 'bg-blue-500/20 text-blue-400' :
-                            'bg-gray-500/20 text-gray-400'
+                      (selectedProject.priority || 'medium') === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                        (selectedProject.priority || 'medium') === 'medium' ? 'bg-blue-500/20 text-blue-400' :
+                          'bg-gray-500/20 text-gray-400'
                       }`}>
                       {(selectedProject.priority || 'medium').charAt(0).toUpperCase() + (selectedProject.priority || 'medium').slice(1)} Priority
                     </span>
@@ -812,7 +820,7 @@ export function AdminProjects() {
             </>
           )}
         </DialogContent>
-      </Dialog>
-    </div>
+      </Dialog >
+    </div >
   );
 }

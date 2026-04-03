@@ -14,6 +14,7 @@ import {
   Trash2,
   Clock
 } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 import type { Invoice, InvoiceStatus, Project } from '@/lib/database';
 import { db } from '@/lib/supabase-database';
 import { generateInvoiceWithAI } from '@/lib/ai-service';
@@ -51,6 +52,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
 };
 
 export function AdminInvoices() {
+  const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -180,7 +182,7 @@ export function AdminInvoices() {
       issueDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       amountPaid: 0,
-      createdBy: 'user-admin-1',
+      createdBy: user?.id || 'user-admin-1',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
